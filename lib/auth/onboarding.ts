@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { requireOnboarding } from "@/lib/auth/session";
+import { buildUniqueSlug } from "@/lib/creators/card";
 import { createClient } from "@/lib/supabase/server";
 
 export type OnboardingActionState = {
@@ -61,7 +62,7 @@ export async function completeCreatorOnboarding(
   _prev: OnboardingActionState,
   formData: FormData,
 ): Promise<OnboardingActionState> {
-  const { userId } = await requireOnboarding("creator");
+  const { userId, profile } = await requireOnboarding("creator");
   const headline = trimString(formData.get("headline"));
   const bio = trimString(formData.get("bio")) || null;
   const topicsRaw = trimString(formData.get("topics"));
@@ -92,9 +93,19 @@ export async function completeCreatorOnboarding(
 
   const supabase = await createClient();
 
+  const { data: existing } = await supabase
+    .from("creators")
+    .select("slug")
+    .eq("profile_id", userId)
+    .maybeSingle();
+
+  const slug =
+    existing?.slug ?? buildUniqueSlug(profile.full_name || "creator", userId);
+
   const { error: creatorError } = await supabase.from("creators").upsert(
     {
       profile_id: userId,
+      slug,
       headline,
       bio,
       topics,
@@ -103,7 +114,10 @@ export async function completeCreatorOnboarding(
       price_cents: Math.trunc(priceCents),
       currency: "USD",
       linkedin_url: linkedinUrl,
-      is_discoverable: true,
+      languages: [],
+      location: null,
+      publication_status: "draft",
+      availability: "available",
     },
     { onConflict: "profile_id" },
   );

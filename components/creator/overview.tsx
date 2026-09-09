@@ -105,10 +105,12 @@ export function CreatorOverview({
   profile,
   creator,
   checklist,
+  sharePath = "/creator/card",
 }: {
   profile: Profile;
   creator: Creator | null;
   checklist: ChecklistItem[];
+  sharePath?: string;
 }) {
   const firstName = profile.full_name.split(/\s+/)[0] || profile.full_name;
   const completed = checklist.filter((item) => item.done).length;
@@ -205,7 +207,7 @@ export function CreatorOverview({
           </div>
 
           <div className="mt-5">
-            <CreatorCardActions cardPath="/creator/card" />
+            <CreatorCardActions cardPath={sharePath} />
           </div>
         </section>
 

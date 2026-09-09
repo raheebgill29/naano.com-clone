@@ -21,6 +21,7 @@ export const creatorNav: NavItem[] = [
 export const brandNav: NavItem[] = [
   { label: "Overview", href: "/brand/dashboard" },
   { label: "Marketplace", href: "/brand/discover" },
+  { label: "Shortlist", href: "/brand/shortlist" },
   { label: "Campaigns", href: "/brand/campaigns" },
   { label: "Collaborations", href: "/brand/collaborations" },
   { label: "Analytics", soon: true },

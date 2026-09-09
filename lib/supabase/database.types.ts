@@ -1,4 +1,6 @@
 export type UserRole = "brand" | "creator";
+export type PublicationStatus = "draft" | "published";
+export type AvailabilityStatus = "available" | "unavailable";
 
 export type Profile = {
   id: string;
@@ -25,6 +27,7 @@ export type Brand = {
 export type Creator = {
   id: string;
   profile_id: string;
+  slug: string;
   headline: string;
   bio: string | null;
   topics: string[];
@@ -33,9 +36,42 @@ export type Creator = {
   price_cents: number;
   currency: string;
   linkedin_url: string | null;
+  location: string | null;
+  languages: string[];
+  publication_status: PublicationStatus;
+  availability: AvailabilityStatus;
   is_discoverable: boolean;
   created_at: string;
   updated_at: string;
+};
+
+export type SavedCreator = {
+  id: string;
+  brand_id: string;
+  creator_id: string;
+  created_at: string;
+};
+
+export type MarketplaceCreator = Pick<
+  Creator,
+  | "id"
+  | "slug"
+  | "headline"
+  | "bio"
+  | "topics"
+  | "audience_size"
+  | "audience_summary"
+  | "price_cents"
+  | "currency"
+  | "linkedin_url"
+  | "location"
+  | "languages"
+  | "publication_status"
+  | "availability"
+  | "is_discoverable"
+> & {
+  full_name: string;
+  avatar_url: string | null;
 };
 
 export type Database = {
@@ -80,6 +116,7 @@ export type Database = {
         Insert: {
           id?: string;
           profile_id: string;
+          slug: string;
           headline: string;
           bio?: string | null;
           topics?: string[];
@@ -88,13 +125,28 @@ export type Database = {
           price_cents: number;
           currency?: string;
           linkedin_url?: string | null;
+          location?: string | null;
+          languages?: string[];
+          publication_status?: PublicationStatus;
+          availability?: AvailabilityStatus;
           is_discoverable?: boolean;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<
-          Omit<Creator, "id" | "created_at"> & { updated_at?: string }
+          Omit<Creator, "id" | "created_at" | "slug"> & { updated_at?: string }
         >;
+        Relationships: [];
+      };
+      saved_creators: {
+        Row: SavedCreator;
+        Insert: {
+          id?: string;
+          brand_id: string;
+          creator_id: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<SavedCreator, "id" | "created_at">>;
         Relationships: [];
       };
     };
@@ -107,6 +159,8 @@ export type Database = {
     };
     Enums: {
       user_role: UserRole;
+      publication_status: PublicationStatus;
+      availability_status: AvailabilityStatus;
     };
     CompositeTypes: Record<string, never>;
   };

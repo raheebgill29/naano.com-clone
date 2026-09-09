@@ -47,6 +47,12 @@ export default async function CreatorDashboardPage() {
       done: Boolean(creator?.linkedin_url?.trim()),
       href: "/creator/card",
     },
+    {
+      id: "publish",
+      label: "Publish card to marketplace",
+      done: creator?.publication_status === "published",
+      href: "/creator/card",
+    },
   ];
 
   return (
@@ -54,6 +60,11 @@ export default async function CreatorDashboardPage() {
       profile={profile}
       creator={creator}
       checklist={checklist}
+      sharePath={
+        creator?.publication_status === "published" && creator.slug
+          ? `/brand/creators/${creator.slug}`
+          : "/creator/card"
+      }
     />
   );
 }
