@@ -1,14 +1,11 @@
-import Link from "next/link";
-
-import { ConversationThread } from "@/components/messages/conversation";
-import { MessagesInbox } from "@/components/messages/inbox";
-import { EmptyState, PageHeader } from "@/components/workspace/ui";
+import { EmptyState } from "@/components/workspace/ui";
+import { MessagingWorkspace } from "@/components/messages/workspace";
 import {
   getConversation,
   listMessageInbox,
 } from "@/lib/messages/queries";
 import { createClient } from "@/lib/supabase/server";
-import type { UserRole } from "@/lib/supabase/database.types";
+import type { CampaignCreatorStatus, UserRole } from "@/lib/supabase/database.types";
 
 export async function MessagesInboxPage({ role }: { role: UserRole }) {
   const supabase = await createClient();
@@ -18,11 +15,11 @@ export async function MessagesInboxPage({ role }: { role: UserRole }) {
   const { items, error } = await listMessageInbox(role);
 
   return (
-    <MessagesInbox
+    <MessagingWorkspace
       role={role}
-      items={items}
-      error={error}
       currentUserId={user?.id ?? ""}
+      inboxItems={items}
+      inboxError={error}
     />
   );
 }
@@ -34,25 +31,25 @@ export async function MessagesConversationPage({
   role: UserRole;
   id: string;
 }) {
-  const base = role === "brand" ? "/brand/messages" : "/creator/messages";
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const {
-    collab,
-    campaignName,
-    otherPartyName,
-    statusLabel,
-    thread,
-    error,
-  } = await getConversation(role, id);
+  const [{ items, error: inboxError }, conversation] = await Promise.all([
+    listMessageInbox(role),
+    getConversation(role, id),
+  ]);
 
-  if (error) {
-    return <EmptyState title="Could not load conversation" description={error} />;
+  if (conversation.error) {
+    return (
+      <EmptyState
+        title="Could not load conversation"
+        description={conversation.error}
+      />
+    );
   }
-  if (!collab || !user) {
+  if (!conversation.collab || !user) {
     return (
       <EmptyState
         title="Conversation not found"
@@ -62,34 +59,18 @@ export async function MessagesConversationPage({
   }
 
   return (
-    <div className="space-y-4">
-      <PageHeader
-        eyebrow="Conversation"
-        title={otherPartyName ?? "Participant"}
-        description={`${campaignName} · ${statusLabel}`}
-        actions={
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href={base}
-              className="text-sm font-semibold text-accent hover:text-accent-hover"
-            >
-              ← Inbox
-            </Link>
-            <Link
-              href={`/${role}/collaborations/${id}`}
-              className="text-sm font-semibold text-accent hover:text-accent-hover"
-            >
-              Open collaboration
-            </Link>
-          </div>
-        }
-      />
-      <ConversationThread
-        key={id}
-        items={thread}
-        campaignCreatorId={id}
-        currentUserId={user.id}
-      />
-    </div>
+    <MessagingWorkspace
+      role={role}
+      currentUserId={user.id}
+      inboxItems={items}
+      inboxError={inboxError}
+      activeId={id}
+      conversation={{
+        otherPartyName: conversation.otherPartyName ?? "Participant",
+        campaignName: conversation.campaignName ?? "Campaign",
+        status: conversation.collab.status as CampaignCreatorStatus,
+        thread: conversation.thread,
+      }}
+    />
   );
 }
