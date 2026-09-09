@@ -18,10 +18,8 @@ const initialState: AuthActionState = {};
 
 export function LoginForm({
   nextPath,
-  authError,
 }: {
   nextPath?: string;
-  authError?: string;
 }) {
   const [state, formAction, pending] = useActionState(
     signInAction,
@@ -62,10 +60,7 @@ export function LoginForm({
           required
           autoComplete="current-password"
         />
-        <FormMessage
-          error={state.error ?? authError}
-          success={state.success}
-        />
+        <FormMessage error={state.error} success={state.success} />
         <SubmitButton pending={pending}>Sign in</SubmitButton>
       </form>
     </AuthLayout>

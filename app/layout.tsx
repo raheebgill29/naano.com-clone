@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { AppToaster } from "@/components/ui/toaster";
+import { UrlFlashToasts } from "@/components/ui/url-flash-toasts";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,6 +30,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-page font-sans text-ink">
         {children}
+        <AppToaster />
+        <UrlFlashToasts />
       </body>
     </html>
   );

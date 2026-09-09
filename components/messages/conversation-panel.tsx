@@ -19,6 +19,7 @@ import {
 } from "@/components/messages/ui";
 import { useCollaborationMessages } from "@/lib/messages/use-collaboration-messages";
 import type { ThreadItem } from "@/lib/messages/queries";
+import { appToast } from "@/lib/toast";
 import type { CampaignCreatorStatus, UserRole } from "@/lib/supabase/database.types";
 
 type MessageItem = Extract<ThreadItem, { kind: "message" }>;
@@ -393,7 +394,7 @@ function MessageComposer({
   onSend: (body: string) => Promise<{ error: string | null }>;
 }) {
   const [body, setBody] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -408,13 +409,17 @@ function MessageComposer({
     if (sending) return;
     const clean = body.trim();
     if (!clean) {
-      setError("Message cannot be blank.");
+      setFieldError("Message cannot be blank.");
       return;
     }
-    setError(null);
+    setFieldError(null);
     const result = await onSend(clean);
     if (result.error) {
-      setError(result.error);
+      appToast.error({
+        title: "Message not sent",
+        description: result.error,
+        id: `message-send:${result.error}`,
+      });
       return;
     }
     setBody("");
@@ -474,9 +479,9 @@ function MessageComposer({
           <p className="text-[11px] text-ink-subtle">{body.length}/2000</p>
         )}
       </div>
-      {error ? (
-        <p className="mt-2 rounded-lg border border-red-200 bg-danger-soft px-3 py-2 text-sm text-danger">
-          {error}
+      {fieldError ? (
+        <p className="mt-2 text-xs text-danger" role="status">
+          {fieldError}
         </p>
       ) : null}
     </form>

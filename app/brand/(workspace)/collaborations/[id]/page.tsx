@@ -20,21 +20,13 @@ import {
   nextActionForStatus,
 } from "@/lib/collaborations/queries";
 
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
 export default async function BrandCollaborationDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await requireRole("brand");
   const { id } = await params;
-  const sp = await searchParams;
-  const pageError = first(sp.error);
   if (!id || !/^[0-9a-f-]{36}$/i.test(id)) notFound();
 
   const { collab, campaign, creator, drafts, events, error } =
@@ -84,12 +76,6 @@ export default async function BrandCollaborationDetailPage({
           </div>
         }
       />
-
-      {pageError ? (
-        <p className="rounded-lg border border-red-200 bg-danger-soft px-3 py-2 text-sm text-danger">
-          {pageError}
-        </p>
-      ) : null}
 
       <p className="rounded-lg border border-accent/20 bg-accent-soft px-4 py-3 text-sm font-medium text-accent">
         Next: {nextActionForStatus(collab.status, "brand")}

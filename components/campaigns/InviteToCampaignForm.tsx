@@ -3,6 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
 
+import { FormMessage } from "@/components/ui/form-message";
 import type { CampaignStatus } from "@/lib/supabase/database.types";
 import {
   inviteCreatorToCampaign,
@@ -86,22 +87,8 @@ export function InviteToCampaignForm({
           ) : null}
         </div>
 
-        <p className="sr-only" aria-live="polite">
-          {state.error || state.success || ""}
-        </p>
+        <FormMessage error={state.error} success={state.success} />
       </form>
-
-      {state.error ? (
-        <p className="text-xs text-danger" role="status">
-          {state.error}
-        </p>
-      ) : null}
-      {state.success ? (
-        <p className="text-xs text-success" role="status">
-          {state.success}
-        </p>
-      ) : null}
     </div>
   );
 }
-

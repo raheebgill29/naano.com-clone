@@ -12,6 +12,7 @@ import {
   type CreatorCardActionState,
 } from "@/lib/creators/actions";
 import { getPublishRequirements } from "@/lib/creators/card";
+import { appToast } from "@/lib/toast";
 import type { Creator, Profile } from "@/lib/supabase/database.types";
 
 const initialState: CreatorCardActionState = {};
@@ -396,61 +397,70 @@ function ShareActions({
   cardPath: string;
   disabled?: boolean;
 }) {
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
   async function copyLink() {
-    setMessage(null);
-    setError(null);
     try {
       const url = new URL(cardPath, window.location.origin).toString();
       await navigator.clipboard.writeText(url);
-      setMessage("Card link copied.");
+      appToast.success({
+        title: "Card link copied",
+        id: "card-editor-copy",
+      });
     } catch {
-      setError("Could not copy link.");
+      appToast.error({
+        title: "Could not copy link",
+        id: "card-editor-copy-error",
+      });
     }
   }
 
   async function share() {
-    setMessage(null);
-    setError(null);
     const url = new URL(cardPath, window.location.origin).toString();
     try {
       if (navigator.share) {
         await navigator.share({ title: "My Naano creator card", url });
-        setMessage("Share sheet opened.");
+        appToast.success({
+          title: "Share sheet opened",
+          id: "card-editor-share",
+        });
         return;
       }
       await navigator.clipboard.writeText(url);
-      setMessage("Sharing unavailable — link copied.");
+      appToast.info({
+        title: "Sharing unavailable",
+        description: "Link copied instead.",
+        id: "card-editor-share-fallback",
+      });
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      setError("Could not share card.");
+      appToast.error({
+        title: "Could not share card",
+        id: "card-editor-share-error",
+      });
     }
   }
 
   return (
-    <div className="space-y-1 text-right">
-      <div className="flex flex-wrap justify-end gap-2">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={copyLink}
-          className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:bg-[#f7f8fa] disabled:opacity-50"
-        >
-          Copy link
-        </button>
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={share}
-          className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:bg-[#f7f8fa] disabled:opacity-50"
-        >
-          Share
-        </button>
-      </div>
-      {message ? <p className="text-xs text-success">{message}</p> : null}
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
+    <div className="flex flex-wrap justify-end gap-2">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => {
+          void copyLink();
+        }}
+        className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:bg-[#f7f8fa] disabled:opacity-50"
+      >
+        Copy link
+      </button>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => {
+          void share();
+        }}
+        className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:bg-[#f7f8fa] disabled:opacity-50"
+      >
+        Share
+      </button>
     </div>
   );
 }

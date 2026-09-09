@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
 import { PrimaryLink, SecondaryLink } from "@/components/ui/primitives";
 import {
@@ -9,6 +8,7 @@ import {
   formatPriceCents,
   initials,
 } from "@/components/workspace/ui";
+import { appToast } from "@/lib/toast";
 import type { Creator, Profile } from "@/lib/supabase/database.types";
 
 type ChecklistItem = {
@@ -19,20 +19,20 @@ type ChecklistItem = {
 };
 
 export function CreatorCardActions({ cardPath }: { cardPath: string }) {
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
-
   async function copyLink() {
     try {
       const url = new URL(cardPath, window.location.origin).toString();
       await navigator.clipboard.writeText(url);
-      setMessage({ type: "success", text: "Card link copied to clipboard." });
+      appToast.success({
+        title: "Card link copied",
+        description: "The link is ready to paste.",
+        id: "creator-card-copy",
+      });
     } catch {
-      setMessage({
-        type: "error",
-        text: "Could not copy the link. Try again.",
+      appToast.error({
+        title: "Could not copy the link",
+        description: "Try again in a moment.",
+        id: "creator-card-copy-error",
       });
     }
   }
@@ -45,58 +45,53 @@ export function CreatorCardActions({ cardPath }: { cardPath: string }) {
           title: "My Naano creator card",
           url,
         });
-        setMessage({ type: "success", text: "Share sheet opened." });
+        appToast.success({
+          title: "Share sheet opened",
+          id: "creator-card-share",
+        });
         return;
       }
       await navigator.clipboard.writeText(url);
-      setMessage({
-        type: "success",
-        text: "Sharing unavailable — link copied instead.",
+      appToast.info({
+        title: "Sharing unavailable",
+        description: "Link copied instead.",
+        id: "creator-card-share-fallback",
       });
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         return;
       }
-      setMessage({
-        type: "error",
-        text: "Could not share the card. Try copying the link.",
+      appToast.error({
+        title: "Could not share the card",
+        description: "Try copying the link instead.",
+        id: "creator-card-share-error",
       });
     }
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        <PrimaryLink href={cardPath} className="!w-auto">
-          Open card
-        </PrimaryLink>
-        <button
-          type="button"
-          onClick={copyLink}
-          className="inline-flex items-center justify-center rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-page"
-        >
-          Copy card link
-        </button>
-        <button
-          type="button"
-          onClick={shareCard}
-          className="inline-flex items-center justify-center rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-page"
-        >
-          Share card
-        </button>
-      </div>
-      {message ? (
-        <p
-          role="status"
-          className={`rounded-lg px-3 py-2 text-sm ${
-            message.type === "success"
-              ? "border border-emerald-200 bg-success-soft text-success"
-              : "border border-red-200 bg-danger-soft text-danger"
-          }`}
-        >
-          {message.text}
-        </p>
-      ) : null}
+    <div className="flex flex-wrap gap-2">
+      <PrimaryLink href={cardPath} className="!w-auto">
+        Open card
+      </PrimaryLink>
+      <button
+        type="button"
+        onClick={() => {
+          void copyLink();
+        }}
+        className="inline-flex items-center justify-center rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-page"
+      >
+        Copy card link
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          void shareCard();
+        }}
+        className="inline-flex items-center justify-center rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-page"
+      >
+        Share card
+      </button>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ConfirmButton } from "@/components/campaigns/ConfirmButton";
 import { CampaignForm } from "@/components/campaigns/CampaignForm";
+import { LoadErrorToast } from "@/components/ui/load-error-toast";
 import {
   EmptyState,
   PageHeader,
@@ -235,7 +236,16 @@ export default async function BrandCampaignDetailPage({
         </div>
 
         {inviteError ? (
-          <p className="mt-4 text-sm text-danger">{inviteError.message}</p>
+          <>
+            <LoadErrorToast
+              message={inviteError.message}
+              id={`campaign-invites:${campaign.id}`}
+            />
+            <p className="mt-4 text-sm text-support">
+              Invites could not be loaded right now. Refresh the page to try
+              again.
+            </p>
+          </>
         ) : invitations.length === 0 ? (
           <p className="mt-4 text-sm text-support">
             No creators invited yet. Open marketplace or shortlist and use Invite

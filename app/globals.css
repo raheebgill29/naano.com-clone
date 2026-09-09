@@ -64,3 +64,179 @@ select:focus-visible,
 ::selection {
   background: color-mix(in srgb, var(--accent) 18%, white);
 }
+
+/* ---------------------------------------------------------------------------
+ * App toasts (Sonner) — distinct from the notification bell
+ * --------------------------------------------------------------------------- */
+[data-sonner-toaster] {
+  --width: min(24rem, calc(100vw - 1.5rem));
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  z-index: 70;
+}
+
+[data-sonner-toaster][data-x-position="center"] {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.naano-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: var(--width);
+  padding: 0.875rem 2.25rem 0.875rem 0.875rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow:
+    0 1px 2px rgb(20 20 20 / 4%),
+    0 8px 24px rgb(20 20 20 / 8%),
+    0 20px 40px rgb(20 20 20 / 4%);
+  position: relative;
+}
+
+.naano-toast[data-type="success"] {
+  border-color: color-mix(in srgb, var(--success) 22%, var(--line));
+}
+
+.naano-toast[data-type="error"] {
+  border-color: color-mix(in srgb, var(--danger) 28%, var(--line));
+}
+
+.naano-toast[data-type="warning"] {
+  border-color: color-mix(in srgb, #b54708 28%, var(--line));
+}
+
+.naano-toast[data-type="info"],
+.naano-toast[data-type="loading"] {
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--line));
+}
+
+.naano-toast__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: 0;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.naano-toast[data-type="success"] [data-icon],
+.naano-toast[data-type="success"] .naano-toast__icon {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.naano-toast[data-type="error"] [data-icon],
+.naano-toast[data-type="error"] .naano-toast__icon {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.naano-toast[data-type="warning"] [data-icon],
+.naano-toast[data-type="warning"] .naano-toast__icon {
+  color: #b54708;
+  background: #fffaeb;
+}
+
+.naano-toast[data-type="info"] [data-icon],
+.naano-toast[data-type="info"] .naano-toast__icon,
+.naano-toast[data-type="loading"] [data-icon],
+.naano-toast[data-type="loading"] .naano-toast__icon {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.naano-toast [data-icon] {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: 0;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.naano-toast [data-icon] svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.naano-toast [data-content] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+  padding-top: 0.1rem;
+}
+
+.naano-toast__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.naano-toast__description {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.naano-toast__action {
+  margin-top: 0.35rem;
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.naano-toast__action:hover {
+  color: var(--accent-hover);
+}
+
+.naano-toast__close {
+  position: absolute !important;
+  top: 0.55rem !important;
+  right: 0.55rem !important;
+  left: auto !important;
+  transform: none !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  border-radius: 0.45rem !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--ink-subtle) !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.naano-toast__close:hover {
+  background: #f7f8fa !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+.naano-toast__close svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toast],
+  [data-sonner-toast] * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+

@@ -154,25 +154,5 @@ export function TextArea({
   );
 }
 
-export function FormMessage({
-  error,
-  success,
-}: {
-  error?: string;
-  success?: string;
-}) {
-  if (!error && !success) return null;
-  return (
-    <p
-      className={`rounded-lg px-3 py-2.5 text-sm ${
-        error
-          ? "border border-red-200 bg-danger-soft text-danger"
-          : "border border-emerald-200 bg-success-soft text-success"
-      }`}
-      role="status"
-      aria-live="polite"
-    >
-      {error ?? success}
-    </p>
-  );
-}
+export { FormMessage } from "@/components/ui/form-message";
+
