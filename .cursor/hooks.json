@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": ".cursor/hooks/agent-capture.cmd"
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": ".cursor/hooks/agent-capture.cmd"
+      }
+    ]
+  }
+}
