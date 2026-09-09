@@ -10,10 +10,13 @@ export function SaveCreatorButton({
   creatorId,
   initiallySaved,
   variant = "button",
+  undoableRemove = false,
 }: {
   creatorId: string;
   initiallySaved: boolean;
   variant?: "button" | "icon";
+  /** When true, removing shows a toast with Undo that re-saves the creator. */
+  undoableRemove?: boolean;
 }) {
   const router = useRouter();
   const [saved, setSaved] = useState(initiallySaved);
@@ -23,9 +26,54 @@ export function SaveCreatorButton({
     event?.preventDefault();
     event?.stopPropagation();
     startTransition(async () => {
-      const result = saved
-        ? await unsaveCreator(creatorId)
-        : await saveCreator(creatorId);
+      if (saved) {
+        const result = await unsaveCreator(creatorId);
+        if (result.error) {
+          appToast.error({
+            title: result.error,
+            id: `save-creator:${creatorId}:error`,
+          });
+          return;
+        }
+        setSaved(false);
+        if (undoableRemove) {
+          appToast.info({
+            title: "Removed from shortlist",
+            description: "You can undo this within a few seconds.",
+            id: `save-creator:${creatorId}:removed`,
+            action: {
+              label: "Undo",
+              onClick: () => {
+                void (async () => {
+                  const restore = await saveCreator(creatorId);
+                  if (restore.error) {
+                    appToast.error({
+                      title: restore.error,
+                      id: `save-creator:${creatorId}:undo-error`,
+                    });
+                    return;
+                  }
+                  setSaved(true);
+                  appToast.success({
+                    title: "Creator restored to shortlist",
+                    id: `save-creator:${creatorId}:restored`,
+                  });
+                  router.refresh();
+                })();
+              },
+            },
+          });
+        } else if (result.success) {
+          appToast.success({
+            title: result.success,
+            id: `save-creator:${creatorId}:removed`,
+          });
+        }
+        router.refresh();
+        return;
+      }
+
+      const result = await saveCreator(creatorId);
       if (result.error) {
         appToast.error({
           title: result.error,
@@ -33,11 +81,11 @@ export function SaveCreatorButton({
         });
         return;
       }
-      setSaved(!saved);
+      setSaved(true);
       if (result.success) {
         appToast.success({
           title: result.success,
-          id: `save-creator:${creatorId}:${result.success}`,
+          id: `save-creator:${creatorId}:saved`,
         });
       }
       router.refresh();
@@ -52,15 +100,15 @@ export function SaveCreatorButton({
         disabled={pending}
         aria-pressed={saved}
         aria-label={saved ? "Remove from shortlist" : "Save to shortlist"}
-        title={saved ? "Saved to shortlist" : "Save to shortlist"}
-        className={`inline-flex h-9 w-9 items-center justify-center rounded-[10px] border transition-[background-color,border-color,color] duration-150 disabled:opacity-60 ${
+        title={saved ? "Remove from shortlist" : "Save to shortlist"}
+        className={`inline-flex h-8 w-8 items-center justify-center rounded-[10px] border transition-[background-color,border-color,color] duration-150 disabled:opacity-60 ${
           saved
             ? "border-accent/30 bg-accent-soft text-accent"
             : "border-line bg-surface text-ink-subtle hover:border-line-strong hover:bg-page hover:text-ink"
         }`}
       >
         <svg
-          className="h-[18px] w-[18px]"
+          className="h-4 w-4"
           viewBox="0 0 24 24"
           fill={saved ? "currentColor" : "none"}
           aria-hidden
@@ -72,9 +120,7 @@ export function SaveCreatorButton({
             strokeLinejoin="round"
           />
         </svg>
-        <span className="sr-only">
-          {saved ? "Saved" : "Not saved"}
-        </span>
+        <span className="sr-only">{saved ? "Saved" : "Not saved"}</span>
       </button>
     );
   }
