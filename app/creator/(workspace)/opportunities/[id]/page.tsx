@@ -245,16 +245,29 @@ export default async function CreatorOpportunityDetailPage({
             </form>
           </div>
         </section>
-      ) : invitation.status === "accepted" ? (
+      ) : invitation.status === "accepted" ||
+        [
+          "draft_submitted",
+          "revision_requested",
+          "approved",
+          "scheduled",
+          "published",
+          "completed",
+          "cancelled",
+        ].includes(invitation.status) ? (
         <EmptyState
-          title="Invitation accepted"
-          description="This opportunity is now listed under Collaborations."
+          title={
+            invitation.status === "accepted"
+              ? "Invitation accepted"
+              : "Handled in Collaborations"
+          }
+          description="Continue this work from the collaboration detail page."
           action={
             <Link
-              href="/creator/collaborations"
+              href={`/creator/collaborations/${invitation.id}`}
               className="text-sm font-semibold text-accent"
             >
-              Open collaborations
+              Open collaboration
             </Link>
           }
         />

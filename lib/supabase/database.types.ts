@@ -5,8 +5,16 @@ export type CampaignStatus = "draft" | "active" | "completed" | "archived";
 export type CampaignCreatorStatus =
   | "booking_pending"
   | "accepted"
+  | "draft_submitted"
+  | "revision_requested"
+  | "approved"
+  | "scheduled"
+  | "published"
+  | "completed"
   | "declined"
   | "cancelled";
+
+export type ContentSubmissionType = "draft" | "publish";
 
 export type Profile = {
   id: string;
@@ -86,12 +94,44 @@ export type CampaignCreator = {
   currency: string;
   post_count_snapshot: number;
   decline_reason: string | null;
+  published_url: string | null;
+  scheduled_publish_at: string | null;
+  latest_feedback: string | null;
+  cancel_reason: string | null;
   invited_at: string;
   accepted_at: string | null;
   declined_at: string | null;
   cancelled_at: string | null;
+  revision_requested_at: string | null;
+  approved_at: string | null;
+  scheduled_at: string | null;
+  published_at: string | null;
+  completed_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type ContentSubmission = {
+  id: string;
+  campaign_creator_id: string;
+  submission_type: ContentSubmissionType;
+  version: number;
+  body: string | null;
+  asset_url: string | null;
+  published_url: string | null;
+  notes: string | null;
+  submitted_by: string;
+  created_at: string;
+};
+
+export type CollaborationEvent = {
+  id: string;
+  campaign_creator_id: string;
+  event_type: string;
+  actor_profile_id: string | null;
+  message: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
 };
 
 export type MarketplaceCreator = Pick<
@@ -230,21 +270,68 @@ export type Database = {
           currency?: string;
           post_count_snapshot: number;
           decline_reason?: string | null;
+          published_url?: string | null;
+          scheduled_publish_at?: string | null;
+          latest_feedback?: string | null;
+          cancel_reason?: string | null;
           invited_at?: string;
           accepted_at?: string | null;
           declined_at?: string | null;
           cancelled_at?: string | null;
+          revision_requested_at?: string | null;
+          approved_at?: string | null;
+          scheduled_at?: string | null;
+          published_at?: string | null;
+          completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<
           Omit<
             CampaignCreator,
-            "id" | "created_at" | "campaign_id" | "creator_id" | "invited_at" | "price_cents" | "post_count_snapshot" | "currency"
+            | "id"
+            | "created_at"
+            | "campaign_id"
+            | "creator_id"
+            | "invited_at"
+            | "price_cents"
+            | "post_count_snapshot"
+            | "currency"
           > & {
             updated_at?: string;
           }
         >;
+        Relationships: [];
+      };
+      content_submissions: {
+        Row: ContentSubmission;
+        Insert: {
+          id?: string;
+          campaign_creator_id: string;
+          submission_type: ContentSubmissionType;
+          version: number;
+          body?: string | null;
+          asset_url?: string | null;
+          published_url?: string | null;
+          notes?: string | null;
+          submitted_by: string;
+          created_at?: string;
+        };
+        Update: Partial<ContentSubmission>;
+        Relationships: [];
+      };
+      collaboration_events: {
+        Row: CollaborationEvent;
+        Insert: {
+          id?: string;
+          campaign_creator_id: string;
+          event_type: string;
+          actor_profile_id?: string | null;
+          message?: string | null;
+          metadata?: Record<string, unknown>;
+          created_at?: string;
+        };
+        Update: Partial<CollaborationEvent>;
         Relationships: [];
       };
     };
@@ -260,6 +347,51 @@ export type Database = {
           p_full_name: string;
         };
         Returns: Profile;
+      };
+      collab_submit_draft: {
+        Args: {
+          p_campaign_creator_id: string;
+          p_body: string;
+          p_asset_url?: string | null;
+          p_notes?: string | null;
+        };
+        Returns: CampaignCreator;
+      };
+      collab_request_revision: {
+        Args: {
+          p_campaign_creator_id: string;
+          p_feedback: string;
+        };
+        Returns: CampaignCreator;
+      };
+      collab_approve_draft: {
+        Args: { p_campaign_creator_id: string };
+        Returns: CampaignCreator;
+      };
+      collab_schedule: {
+        Args: {
+          p_campaign_creator_id: string;
+          p_scheduled_publish_at: string;
+        };
+        Returns: CampaignCreator;
+      };
+      collab_submit_published_url: {
+        Args: {
+          p_campaign_creator_id: string;
+          p_published_url: string;
+        };
+        Returns: CampaignCreator;
+      };
+      collab_complete: {
+        Args: { p_campaign_creator_id: string };
+        Returns: CampaignCreator;
+      };
+      collab_cancel: {
+        Args: {
+          p_campaign_creator_id: string;
+          p_reason: string;
+        };
+        Returns: CampaignCreator;
       };
     };
     Enums: {

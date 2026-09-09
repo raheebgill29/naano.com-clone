@@ -107,6 +107,7 @@ export function CreatorOverview({
   checklist,
   sharePath = "/creator/card",
   opportunityCounts,
+  collabCounts,
 }: {
   profile: Profile;
   creator: Creator | null;
@@ -116,6 +117,11 @@ export function CreatorOverview({
     pending: number;
     accepted: number;
     declined: number;
+  };
+  collabCounts?: {
+    active: number;
+    completed: number;
+    cancelled: number;
   };
 }) {
   const firstName = profile.full_name.split(/\s+/)[0] || profile.full_name;
@@ -131,21 +137,32 @@ export function CreatorOverview({
           Welcome back, {firstName}
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-support">
-          Review your public profile, track upcoming opportunities, and keep
-          your creator card ready for brands.
+          Review your public profile, track opportunities, and deliver accepted
+          collaborations.
         </p>
       </div>
 
       <section
-        aria-label="Performance metrics"
+        aria-label="Workspace counts"
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
-        <Metric label="Public post reach" value="—" hint="No campaign data yet" />
-        <Metric label="Public posts" value="—" hint="No published posts yet" />
         <Metric
-          label="Public engagements"
-          value="—"
-          hint="No engagement data yet"
+          label="Pending opportunities"
+          value={String(opportunityCounts?.pending ?? 0)}
+          hint="Invitations waiting for your response"
+          href="/creator/opportunities"
+        />
+        <Metric
+          label="Active collaborations"
+          value={String(collabCounts?.active ?? 0)}
+          hint="Accepted work in progress"
+          href="/creator/collaborations"
+        />
+        <Metric
+          label="Completed collaborations"
+          value={String(collabCounts?.completed ?? 0)}
+          hint="Finished booked work"
+          href="/creator/collaborations?filter=completed"
         />
         <Metric
           label="LinkedIn followers"
@@ -261,7 +278,7 @@ export function CreatorOverview({
             <h2 className="text-base font-semibold text-ink">Opportunities</h2>
             <p className="mt-1 text-sm text-support">
               {opportunityCounts
-                ? `${opportunityCounts.pending} pending · ${opportunityCounts.accepted} accepted · ${opportunityCounts.declined} declined`
+                ? `${opportunityCounts.pending} pending · ${opportunityCounts.accepted} newly accepted · ${opportunityCounts.declined} declined`
                 : "Booking requests from brands will appear here."}
             </p>
           </div>
@@ -279,9 +296,21 @@ export function CreatorOverview({
               : "You have campaign invitations"}
           </p>
           <p className="mx-auto mt-1 max-w-md text-sm text-support">
-            Keep your creator card discoverable. Brands invite published
-            creators from active campaigns.
+            Accepted work continues under Collaborations
+            {(collabCounts?.active ?? 0) > 0
+              ? ` (${collabCounts?.active} active)`
+              : ""}
+            . Reach and engagement analytics stay empty until real published
+            performance data exists.
           </p>
+          {(collabCounts?.active ?? 0) > 0 ? (
+            <Link
+              href="/creator/collaborations"
+              className="mt-3 inline-block text-sm font-semibold text-accent hover:text-accent-hover"
+            >
+              Open collaborations
+            </Link>
+          ) : null}
         </div>
       </section>
     </div>
@@ -292,12 +321,14 @@ function Metric({
   label,
   value,
   hint,
+  href,
 }: {
   label: string;
   value: string;
   hint?: string;
+  href?: string;
 }) {
-  return (
+  const body = (
     <article className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)]">
       <p className="text-sm font-medium text-support">{label}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-ink">
@@ -305,5 +336,12 @@ function Metric({
       </p>
       {hint ? <p className="mt-1.5 text-xs text-ink-subtle">{hint}</p> : null}
     </article>
+  );
+  return href ? (
+    <Link href={href} className="block transition hover:opacity-90">
+      {body}
+    </Link>
+  ) : (
+    body
   );
 }

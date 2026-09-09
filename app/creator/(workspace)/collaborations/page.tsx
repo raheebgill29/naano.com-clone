@@ -6,12 +6,30 @@ import {
   formatPriceCents,
 } from "@/components/workspace/ui";
 import { requireRole } from "@/lib/auth/session";
+import {
+  STATUS_LABEL,
+  listCreatorCollaborations,
+  nextActionForStatus,
+} from "@/lib/collaborations/queries";
+import type { CampaignCreatorStatus } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function CreatorCollaborationsPage() {
-  const { userId } = await requireRole("creator");
-  const supabase = await createClient();
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
 
+export default async function CreatorCollaborationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { userId } = await requireRole("creator");
+  const params = await searchParams;
+  const filter =
+    (first(params.filter) as "active" | "completed" | "cancelled" | "all") ||
+    "active";
+
+  const supabase = await createClient();
   const { data: creator } = await supabase
     .from("creators")
     .select("id")
@@ -27,67 +45,52 @@ export default async function CreatorCollaborationsPage() {
     );
   }
 
-  const { data: rows, error } = await supabase
-    .from("campaign_creators")
-    .select(
-      "id,status,campaign_id,price_cents,currency,post_count_snapshot,accepted_at",
-    )
-    .eq("creator_id", creator.id)
-    .eq("status", "accepted")
-    .order("accepted_at", { ascending: false });
-
-  const campaignIds = (rows ?? []).map((r) => r.campaign_id);
-  const { data: campaigns } = campaignIds.length
-    ? await supabase
-        .from("campaigns")
-        .select("id,campaign_name,product_or_company,deliverable_type,brand_id")
-        .in("id", campaignIds)
-    : {
-        data: [] as Array<{
-          id: string;
-          campaign_name: string;
-          product_or_company: string;
-          deliverable_type: string;
-          brand_id: string;
-        }>,
-      };
-
-  const brandIds = Array.from(
-    new Set((campaigns ?? []).map((c) => c.brand_id)),
-  );
-  const { data: brands } = brandIds.length
-    ? await supabase
-        .from("brands")
-        .select("id,company_name")
-        .in("id", brandIds)
-    : { data: [] as Array<{ id: string; company_name: string }> };
-
-  const campaignById = new Map((campaigns ?? []).map((c) => [c.id, c]));
-  const brandById = new Map((brands ?? []).map((b) => [b.id, b]));
-
-  const collaborations = (rows ?? []).map((row) => {
-    const campaign = campaignById.get(row.campaign_id);
-    const brand = campaign ? brandById.get(campaign.brand_id) : null;
-    return { ...row, campaign, brand };
+  const { items, error } = await listCreatorCollaborations({
+    creatorId: creator.id,
+    filter,
   });
+
+  const tabs = [
+    { key: "active", label: "Active" },
+    { key: "completed", label: "Completed" },
+    { key: "cancelled", label: "Cancelled" },
+    { key: "all", label: "All" },
+  ] as const;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Collaborations"
         title="Collaborations"
-        description="Accepted opportunities start here. Draft submission and publication tracking come later."
+        description="Accepted work from draft through published posts."
       />
 
+      <div className="flex flex-wrap gap-2">
+        {tabs.map((tab) => (
+          <Link
+            key={tab.key}
+            href={
+              tab.key === "active"
+                ? "/creator/collaborations"
+                : `/creator/collaborations?filter=${tab.key}`
+            }
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+              filter === tab.key
+                ? "bg-accent text-white"
+                : "border border-line bg-surface text-ink hover:bg-[#f7f8fa]"
+            }`}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
+
       {error ? (
+        <EmptyState title="Could not load collaborations" description={error} />
+      ) : items.length === 0 ? (
         <EmptyState
-          title="Could not load collaborations"
-          description={error.message}
-        />
-      ) : collaborations.length === 0 ? (
-        <EmptyState
-          title="No collaborations in progress"
-          description="Accepted opportunities will move here so you can track booked work."
+          title="No collaborations here"
+          description="Accepted invitations appear here so you can submit drafts and published URLs."
           action={
             <Link
               href="/creator/opportunities"
@@ -99,27 +102,32 @@ export default async function CreatorCollaborationsPage() {
         />
       ) : (
         <ul className="space-y-3">
-          {collaborations.map((item) => (
+          {items.map((item) => (
             <li key={item.id}>
               <Link
-                href={`/creator/opportunities/${item.id}`}
+                href={`/creator/collaborations/${item.id}`}
                 className="block rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow)] transition hover:border-line-strong"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-base font-semibold text-ink">
-                      {item.campaign?.campaign_name ?? "Campaign"}
-                    </h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-base font-semibold text-ink">
+                        {item.campaign?.campaign_name ?? "Campaign"}
+                      </h2>
+                      <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[11px] font-semibold text-support">
+                        {STATUS_LABEL[item.status as CampaignCreatorStatus]}
+                      </span>
+                    </div>
                     <p className="mt-1 text-sm text-support">
                       {item.brand?.company_name ?? "Brand"} ·{" "}
-                      {item.campaign?.deliverable_type ?? "Deliverable"} ·
-                      accepted{" "}
-                      {item.accepted_at
-                        ? new Date(item.accepted_at).toLocaleDateString()
-                        : "—"}
+                      {item.campaign?.deliverable_type ?? "Deliverable"}
                     </p>
-                    <p className="mt-2 text-xs font-semibold text-success">
-                      Status: accepted
+                    <p className="mt-2 text-xs font-medium text-accent">
+                      Next:{" "}
+                      {nextActionForStatus(
+                        item.status as CampaignCreatorStatus,
+                        "creator",
+                      )}
                     </p>
                   </div>
                   <p className="text-sm font-semibold text-ink">

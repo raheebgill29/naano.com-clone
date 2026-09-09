@@ -1,4 +1,5 @@
 import { BrandOverview } from "@/components/brand/overview";
+import { ACTIVE_COLLAB_STATUSES } from "@/lib/collaborations/queries";
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,7 +14,9 @@ export default async function BrandDashboardPage() {
 
   const metrics = {
     activeCampaigns: 0,
-    creatorsBooked: 0,
+    activeCollaborations: 0,
+    draftsAwaitingReview: 0,
+    completedCollaborations: 0,
     pendingInvites: 0,
   };
 
@@ -29,16 +32,22 @@ export default async function BrandDashboardPage() {
 
     const campaignIds = (campaigns ?? []).map((c) => c.id);
     if (campaignIds.length) {
-      const { data: invites } = await supabase
+      const { data: rows } = await supabase
         .from("campaign_creators")
         .select("status")
         .in("campaign_id", campaignIds);
 
-      metrics.creatorsBooked = (invites ?? []).filter(
-        (i) => i.status === "accepted",
-      ).length;
-      metrics.pendingInvites = (invites ?? []).filter(
+      metrics.pendingInvites = (rows ?? []).filter(
         (i) => i.status === "booking_pending",
+      ).length;
+      metrics.activeCollaborations = (rows ?? []).filter((i) =>
+        ACTIVE_COLLAB_STATUSES.includes(i.status),
+      ).length;
+      metrics.draftsAwaitingReview = (rows ?? []).filter(
+        (i) => i.status === "draft_submitted",
+      ).length;
+      metrics.completedCollaborations = (rows ?? []).filter(
+        (i) => i.status === "completed",
       ).length;
     }
   }

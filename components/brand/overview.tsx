@@ -13,13 +13,17 @@ export function BrandOverview({
   brand: Brand | null;
   metrics?: {
     activeCampaigns: number;
-    creatorsBooked: number;
+    activeCollaborations: number;
+    draftsAwaitingReview: number;
+    completedCollaborations: number;
     pendingInvites: number;
   };
 }) {
   const company = brand?.company_name || "your brand";
   const activeCampaigns = metrics?.activeCampaigns ?? 0;
-  const creatorsBooked = metrics?.creatorsBooked ?? 0;
+  const activeCollaborations = metrics?.activeCollaborations ?? 0;
+  const draftsAwaitingReview = metrics?.draftsAwaitingReview ?? 0;
+  const completedCollaborations = metrics?.completedCollaborations ?? 0;
   const pendingInvites = metrics?.pendingInvites ?? 0;
 
   return (
@@ -27,7 +31,7 @@ export function BrandOverview({
       <PageHeader
         eyebrow="Brand workspace"
         title={`Welcome, ${profile.full_name.split(/\s+/)[0] || profile.full_name}`}
-        description={`Manage discovery and campaigns for ${company}. Metrics stay empty until real campaign activity exists.`}
+        description={`Manage discovery and campaigns for ${company}. Counts reflect real invitations and collaborations only.`}
         actions={
           <>
             <PrimaryLink href="/brand/discover" className="!w-auto">
@@ -45,10 +49,32 @@ export function BrandOverview({
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         <Metric label="Active campaigns" value={String(activeCampaigns)} />
-        <Metric label="Creators booked" value={String(creatorsBooked)} />
-        <Metric label="Pending invitations" value={String(pendingInvites)} />
-        <Metric label="Published posts" value="—" />
+        <Metric
+          label="Active collaborations"
+          value={String(activeCollaborations)}
+          href="/brand/collaborations"
+        />
+        <Metric
+          label="Drafts awaiting review"
+          value={String(draftsAwaitingReview)}
+          href="/brand/collaborations?filter=needs_review"
+        />
+        <Metric
+          label="Completed collaborations"
+          value={String(completedCollaborations)}
+          href="/brand/collaborations?filter=completed"
+        />
       </section>
+
+      <p className="text-sm text-support">
+        Pending invitations:{" "}
+        <Link
+          href="/brand/campaigns"
+          className="font-semibold text-accent hover:text-accent-hover"
+        >
+          {pendingInvites}
+        </Link>
+      </p>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
@@ -100,15 +126,15 @@ export function BrandOverview({
               </Link>
             </li>
             <li className="rounded-lg border border-line px-3 py-3">
-              <p className="font-medium text-ink">Create a campaign brief</p>
+              <p className="font-medium text-ink">Review collaborations</p>
               <p className="mt-1 text-support">
-                Write the brief, invite creators, and track invitation status.
+                Approve drafts, schedule posts, and mark work complete.
               </p>
               <Link
-                href="/brand/campaigns/new"
+                href="/brand/collaborations"
                 className="mt-2 inline-block font-semibold text-accent hover:text-accent-hover"
               >
-                Create campaign
+                Open collaborations
               </Link>
             </li>
           </ul>
@@ -117,26 +143,46 @@ export function BrandOverview({
 
       <section className="rounded-xl border border-dashed border-line-strong bg-surface px-6 py-10 text-center">
         <h2 className="text-base font-semibold text-ink">
-          {activeCampaigns + creatorsBooked + pendingInvites === 0
+          {activeCampaigns +
+            activeCollaborations +
+            draftsAwaitingReview +
+            completedCollaborations +
+            pendingInvites ===
+          0
             ? "No campaign activity yet"
             : "Campaign activity started"}
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-support">
-          Performance charts stay empty until collaborations produce published
-          posts. We will not invent demo metrics here.
+          Reach, engagement, and lead analytics stay empty until real published
+          performance data exists. We will not invent demo metrics here.
         </p>
       </section>
     </div>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
+function Metric({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string;
+  href?: string;
+}) {
+  const body = (
     <article className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)]">
       <p className="text-sm font-medium text-support">{label}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-ink">
         {value}
       </p>
     </article>
+  );
+  return href ? (
+    <Link href={href} className="block transition hover:opacity-90">
+      {body}
+    </Link>
+  ) : (
+    body
   );
 }

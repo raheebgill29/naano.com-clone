@@ -10,15 +10,18 @@ import {
 } from "@/components/workspace/ui";
 import { archiveCampaign, withdrawInvitation } from "@/lib/campaigns/actions";
 import { requireRole } from "@/lib/auth/session";
+import { STATUS_LABEL } from "@/lib/collaborations/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { CampaignCreatorStatus } from "@/lib/supabase/database.types";
 
-const INVITE_LABEL: Record<CampaignCreatorStatus, string> = {
-  booking_pending: "Pending",
-  accepted: "Accepted",
-  declined: "Declined",
-  cancelled: "Withdrawn",
-};
+const ACTIVE_COST_STATUSES: CampaignCreatorStatus[] = [
+  "accepted",
+  "draft_submitted",
+  "revision_requested",
+  "approved",
+  "scheduled",
+  "published",
+];
 
 export default async function BrandCampaignDetailPage({
   params,
@@ -109,11 +112,17 @@ export default async function BrandCampaignDetailPage({
   }));
 
   const potentialCost = invitations
-    .filter((i) => i.status === "booking_pending" || i.status === "accepted")
+    .filter(
+      (i) =>
+        i.status === "booking_pending" ||
+        ACTIVE_COST_STATUSES.includes(i.status as CampaignCreatorStatus),
+    )
     .reduce((sum, i) => sum + i.price_cents * i.post_count_snapshot, 0);
 
   const committedCost = invitations
-    .filter((i) => i.status === "accepted")
+    .filter((i) =>
+      ACTIVE_COST_STATUSES.includes(i.status as CampaignCreatorStatus),
+    )
     .reduce((sum, i) => sum + i.price_cents * i.post_count_snapshot, 0);
 
   const canEdit = campaign.status === "draft";
@@ -257,7 +266,7 @@ export default async function BrandCampaignDetailPage({
                       )}
                     </p>
                     <p className="mt-1 text-xs font-semibold text-ink">
-                      {INVITE_LABEL[inv.status]}
+                      {STATUS_LABEL[inv.status as CampaignCreatorStatus]}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
@@ -267,6 +276,15 @@ export default async function BrandCampaignDetailPage({
                         className="text-xs font-semibold text-accent"
                       >
                         View card
+                      </Link>
+                    ) : null}
+                    {inv.status !== "booking_pending" &&
+                    inv.status !== "declined" ? (
+                      <Link
+                        href={`/brand/collaborations/${inv.id}`}
+                        className="text-xs font-semibold text-accent"
+                      >
+                        Open collaboration
                       </Link>
                     ) : null}
                     {inv.status === "booking_pending" ? (

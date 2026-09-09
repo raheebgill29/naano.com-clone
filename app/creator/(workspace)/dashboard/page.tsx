@@ -1,4 +1,5 @@
 import { CreatorOverview } from "@/components/creator/overview";
+import { ACTIVE_COLLAB_STATUSES } from "@/lib/collaborations/queries";
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -61,18 +62,31 @@ export default async function CreatorDashboardPage() {
     declined: 0,
   };
 
+  let collabCounts = {
+    active: 0,
+    completed: 0,
+    cancelled: 0,
+  };
+
   if (creator?.id) {
-    const { data: invites } = await supabase
+    const { data: rows } = await supabase
       .from("campaign_creators")
       .select("status")
-      .eq("creator_id", creator.id)
-      .in("status", ["booking_pending", "accepted", "declined"]);
+      .eq("creator_id", creator.id);
 
     opportunityCounts = {
-      pending: (invites ?? []).filter((i) => i.status === "booking_pending")
+      pending: (rows ?? []).filter((i) => i.status === "booking_pending")
         .length,
-      accepted: (invites ?? []).filter((i) => i.status === "accepted").length,
-      declined: (invites ?? []).filter((i) => i.status === "declined").length,
+      accepted: (rows ?? []).filter((i) => i.status === "accepted").length,
+      declined: (rows ?? []).filter((i) => i.status === "declined").length,
+    };
+
+    collabCounts = {
+      active: (rows ?? []).filter((i) =>
+        ACTIVE_COLLAB_STATUSES.includes(i.status),
+      ).length,
+      completed: (rows ?? []).filter((i) => i.status === "completed").length,
+      cancelled: (rows ?? []).filter((i) => i.status === "cancelled").length,
     };
   }
 
@@ -82,6 +96,7 @@ export default async function CreatorDashboardPage() {
       creator={creator}
       checklist={checklist}
       opportunityCounts={opportunityCounts}
+      collabCounts={collabCounts}
       sharePath={
         creator?.publication_status === "published" && creator.slug
           ? `/brand/creators/${creator.slug}`
