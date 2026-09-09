@@ -9,6 +9,7 @@ export type MarketplaceFilters = {
   maxPrice?: number;
   minFollowers?: number;
   maxFollowers?: number;
+  availability?: "available" | "unavailable" | "all";
   sort?: "relevance" | "price_asc" | "price_desc" | "followers_desc";
   page?: number;
   pageSize?: number;
@@ -131,8 +132,14 @@ export async function listMarketplaceCreators(filters: MarketplaceFilters = {}) 
   let query = supabase
     .from("creators")
     .select(MARKETPLACE_SELECT)
-    .eq("publication_status", "published")
-    .eq("availability", "available");
+    .eq("publication_status", "published");
+
+  const availability = filters.availability ?? "available";
+  if (availability === "available") {
+    query = query.eq("availability", "available");
+  } else if (availability === "unavailable") {
+    query = query.eq("availability", "unavailable");
+  }
 
   if (filters.topic) {
     query = query.contains("topics", [filters.topic]);

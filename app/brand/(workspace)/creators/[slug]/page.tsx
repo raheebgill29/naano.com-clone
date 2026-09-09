@@ -89,6 +89,12 @@ export default async function BrandCreatorDetailPage({
           <InviteToCampaignForm
             creatorId={creator.id}
             campaigns={eligibleCampaigns ?? []}
+            creator={{
+              full_name: creator.full_name,
+              headline: creator.headline,
+              price_cents: creator.price_cents,
+              currency: creator.currency,
+            }}
           />
           {creator.linkedin_url ? (
             <a

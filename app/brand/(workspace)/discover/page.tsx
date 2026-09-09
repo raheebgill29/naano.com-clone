@@ -1,9 +1,7 @@
 import Link from "next/link";
 
 import { MarketplaceFilters } from "@/components/marketplace/filters";
-import { CreatorPublicCard } from "@/components/marketplace/creator-card";
-import { SaveCreatorButton } from "@/components/marketplace/save-button";
-import { InviteToCampaignForm } from "@/components/campaigns/InviteToCampaignForm";
+import { MarketplaceCreatorCard } from "@/components/marketplace/marketplace-card";
 import { EmptyState, PageHeader } from "@/components/workspace/ui";
 import { requireRole } from "@/lib/auth/session";
 import {
@@ -23,6 +21,21 @@ function toInt(value: string | undefined) {
   return Number.isFinite(n) ? Math.trunc(n) : undefined;
 }
 
+function buildPageHref(
+  params: Record<string, string | string[] | undefined>,
+  page: number,
+) {
+  const next = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (typeof value === "string" && value && key !== "page") {
+      next.set(key, value);
+    }
+  }
+  if (page > 1) next.set("page", String(page));
+  const qs = next.toString();
+  return qs ? `/brand/discover?${qs}` : "/brand/discover";
+}
+
 export default async function BrandDiscoverPage({
   searchParams,
 }: {
@@ -32,6 +45,12 @@ export default async function BrandDiscoverPage({
   const params = await searchParams;
   const savedOnly = first(params.saved) === "1";
   const page = Math.max(1, toInt(first(params.page)) ?? 1);
+  const availability =
+    (first(params.availability) as
+      | "available"
+      | "unavailable"
+      | "all"
+      | undefined) ?? "available";
 
   const supabase = await createClient();
   const { data: brand } = await supabase
@@ -49,15 +68,17 @@ export default async function BrandDiscoverPage({
     );
   }
 
-  const { data: eligibleCampaigns } = await supabase
-    .from("campaigns")
-    .select("id,campaign_name,status")
-    .eq("brand_id", brand.id)
-    .in("status", ["draft", "active"]);
+  const [{ data: eligibleCampaigns }, { ids: savedIds }, facetSource] =
+    await Promise.all([
+      supabase
+        .from("campaigns")
+        .select("id,campaign_name,status")
+        .eq("brand_id", brand.id)
+        .in("status", ["draft", "active"]),
+      getSavedCreatorIds(brand.id),
+      listMarketplaceCreators({ pageSize: 100, page: 1, availability: "all" }),
+    ]);
 
-  const { ids: savedIds } = await getSavedCreatorIds(brand.id);
-
-  const facetSource = await listMarketplaceCreators({ pageSize: 100, page: 1 });
   const topics = Array.from(
     new Set(facetSource.creators.flatMap((c) => c.topics)),
   ).sort();
@@ -71,7 +92,56 @@ export default async function BrandDiscoverPage({
 
   if (savedOnly) {
     const saved = await listSavedCreators(brand.id);
-    creators = saved.creators.filter((c) => c.availability === "available");
+    let list = saved.creators;
+    if (availability === "available") {
+      list = list.filter((c) => c.availability === "available");
+    } else if (availability === "unavailable") {
+      list = list.filter((c) => c.availability === "unavailable");
+    }
+    const q = first(params.q)?.trim().toLowerCase();
+    if (q) {
+      list = list.filter((c) =>
+        [c.full_name, c.headline, ...c.topics]
+          .join(" ")
+          .toLowerCase()
+          .includes(q),
+      );
+    }
+    const topic = first(params.topic);
+    if (topic) list = list.filter((c) => c.topics.includes(topic));
+    const language = first(params.language);
+    if (language) list = list.filter((c) => c.languages.includes(language));
+    const minPrice = toInt(first(params.minPrice));
+    const maxPrice = toInt(first(params.maxPrice));
+    const minFollowers = toInt(first(params.minFollowers));
+    const maxFollowers = toInt(first(params.maxFollowers));
+    if (minPrice != null) {
+      list = list.filter((c) => c.price_cents >= minPrice);
+    }
+    if (maxPrice != null) {
+      list = list.filter((c) => c.price_cents <= maxPrice);
+    }
+    if (minFollowers != null) {
+      list = list.filter((c) => c.audience_size >= minFollowers);
+    }
+    if (maxFollowers != null) {
+      list = list.filter((c) => c.audience_size <= maxFollowers);
+    }
+    const sort =
+      (first(params.sort) as
+        | "relevance"
+        | "price_asc"
+        | "price_desc"
+        | "followers_desc"
+        | undefined) ?? "followers_desc";
+    if (sort === "price_asc") {
+      list = [...list].sort((a, b) => a.price_cents - b.price_cents);
+    } else if (sort === "price_desc") {
+      list = [...list].sort((a, b) => b.price_cents - a.price_cents);
+    } else {
+      list = [...list].sort((a, b) => b.audience_size - a.audience_size);
+    }
+    creators = list;
     total = creators.length;
     error = saved.error;
   } else {
@@ -83,6 +153,7 @@ export default async function BrandDiscoverPage({
       maxPrice: toInt(first(params.maxPrice)),
       minFollowers: toInt(first(params.minFollowers)),
       maxFollowers: toInt(first(params.maxFollowers)),
+      availability,
       sort: (first(params.sort) as
         | "relevance"
         | "price_asc"
@@ -105,23 +176,43 @@ export default async function BrandDiscoverPage({
       first(params.maxPrice) ||
       first(params.minFollowers) ||
       first(params.maxFollowers) ||
+      (availability && availability !== "available") ||
       savedOnly,
   );
 
   const totalPages = Math.max(1, Math.ceil(total / 12));
+  const resultSummary =
+    error
+      ? "Unable to load results"
+      : total === 0
+        ? hasFilters
+          ? "No matching creators"
+          : "No published creators yet"
+        : savedOnly
+          ? `${total} saved creator${total === 1 ? "" : "s"}`
+          : total === creators.length
+            ? `${total} creator${total === 1 ? "" : "s"}`
+            : `Showing ${creators.length} of ${total} creators`;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Marketplace"
         title="Discover creators"
-        description="Browse published, available creator cards. Results stay empty until creators publish real profiles."
+        description={
+          total > 0
+            ? `${total} creator${total === 1 ? "" : "s"} ready to browse for your next campaign.`
+            : "Find creators with clear pricing and invite them to your campaigns."
+        }
         actions={
           <Link
             href="/brand/shortlist"
-            className="rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink hover:bg-[#f7f8fa]"
+            className="inline-flex items-center justify-center gap-2 rounded-[12px] border border-line-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-page"
           >
-            Open shortlist
+            View shortlist
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-page px-1.5 text-[11px] font-bold text-ink-muted">
+              {savedIds.size}
+            </span>
           </Link>
         }
       />
@@ -130,27 +221,47 @@ export default async function BrandDiscoverPage({
         searchParams={params}
         topics={topics}
         languages={languages}
+        resultSummary={resultSummary}
       />
 
       {error ? (
         <EmptyState
           title="Could not load marketplace"
           description={error}
+          action={
+            <Link
+              href="/brand/discover"
+              className="text-sm font-semibold text-accent"
+            >
+              Try again
+            </Link>
+          }
         />
       ) : creators.length === 0 ? (
         <EmptyState
           title={
-            hasFilters
-              ? "No creators match these filters"
-              : "No published creators yet"
+            savedOnly
+              ? "No saved creators"
+              : hasFilters
+                ? "No creators match these filters"
+                : "No published creators yet"
           }
           description={
-            hasFilters
-              ? "Try clearing filters or broadening price and follower ranges."
-              : "When creators publish their cards, they will appear here automatically."
+            savedOnly
+              ? "Save creators from the marketplace to build your shortlist."
+              : hasFilters
+                ? "Try clearing filters or broadening price and follower ranges."
+                : "When creators publish their cards, they will appear here automatically."
           }
           action={
-            hasFilters ? (
+            savedOnly ? (
+              <Link
+                href="/brand/discover"
+                className="text-sm font-semibold text-accent"
+              >
+                Browse marketplace
+              </Link>
+            ) : hasFilters ? (
               <Link
                 href="/brand/discover"
                 className="text-sm font-semibold text-accent"
@@ -162,28 +273,13 @@ export default async function BrandDiscoverPage({
         />
       ) : (
         <>
-          <p className="text-sm text-support">
-            Showing {creators.length} of {total} creators
-          </p>
-          <ul className="grid gap-4 md:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {creators.map((creator) => (
-              <li key={creator.id}>
-                <CreatorPublicCard
-                  compact
+              <li key={creator.id} className="min-w-0">
+                <MarketplaceCreatorCard
                   creator={creator}
-                  href={`/brand/creators/${creator.slug}`}
-                  actions={
-                    <div className="space-y-3">
-                      <SaveCreatorButton
-                        creatorId={creator.id}
-                        initiallySaved={savedIds.has(creator.id)}
-                      />
-                      <InviteToCampaignForm
-                        creatorId={creator.id}
-                        campaigns={eligibleCampaigns ?? []}
-                      />
-                    </div>
-                  }
+                  saved={savedIds.has(creator.id)}
+                  campaigns={eligibleCampaigns ?? []}
                 />
               </li>
             ))}
@@ -195,14 +291,7 @@ export default async function BrandDiscoverPage({
             >
               {page > 1 ? (
                 <Link
-                  href={`/brand/discover?${new URLSearchParams({
-                    ...Object.fromEntries(
-                      Object.entries(params)
-                        .filter(([, v]) => typeof v === "string")
-                        .map(([k, v]) => [k, String(v)]),
-                    ),
-                    page: String(page - 1),
-                  }).toString()}`}
+                  href={buildPageHref(params, page - 1)}
                   className="text-sm font-semibold text-accent"
                 >
                   Previous
@@ -215,14 +304,7 @@ export default async function BrandDiscoverPage({
               </span>
               {page < totalPages ? (
                 <Link
-                  href={`/brand/discover?${new URLSearchParams({
-                    ...Object.fromEntries(
-                      Object.entries(params)
-                        .filter(([, v]) => typeof v === "string")
-                        .map(([k, v]) => [k, String(v)]),
-                    ),
-                    page: String(page + 1),
-                  }).toString()}`}
+                  href={buildPageHref(params, page + 1)}
                   className="text-sm font-semibold text-accent"
                 >
                   Next

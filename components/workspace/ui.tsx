@@ -88,6 +88,15 @@ export function formatCount(value: number | null | undefined) {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
+/** Compact audience formatting, e.g. 12.4K */
+export function formatCompactCount(value: number | null | undefined) {
+  if (value === null || value === undefined) return "—";
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
 export function formatPriceCents(
   cents: number | null | undefined,
   currency = "USD",

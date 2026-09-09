@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import {
-  formatCount,
+  formatCompactCount,
   formatPriceCents,
   initials,
 } from "@/components/workspace/ui";
@@ -68,7 +68,7 @@ export function CreatorPublicCard({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-support">
-        <span>{formatCount(creator.audience_size)} followers</span>
+        <span>{formatCompactCount(creator.audience_size)} followers</span>
         {creator.location ? <span>{creator.location}</span> : null}
         {creator.languages.length ? (
           <span>{creator.languages.slice(0, 3).join(", ")}</span>
