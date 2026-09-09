@@ -254,6 +254,13 @@ export type Database = {
         Args: Record<string, never>;
         Returns: UserRole;
       };
+      ensure_own_profile: {
+        Args: {
+          p_role: UserRole;
+          p_full_name: string;
+        };
+        Returns: Profile;
+      };
     };
     Enums: {
       user_role: UserRole;

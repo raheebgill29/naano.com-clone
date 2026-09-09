@@ -8,7 +8,7 @@ export default async function LoginPage({
   const params = await searchParams;
   const authError =
     params.error === "profile_missing"
-      ? "Your account is missing a profile. Try signing up again or contact support."
+      ? "Your account needs a quick role setup. Sign in again to continue."
       : params.error === "auth"
         ? "Authentication failed. Please sign in again."
         : undefined;

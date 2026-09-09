@@ -43,12 +43,16 @@ export async function proxy(request: NextRequest) {
 
   // Profile should exist via signup trigger; avoid redirect loops if it does not.
   if (!profile) {
-    if (isAuthFormPath(pathname) || pathname.startsWith("/auth/")) {
+    if (
+      isAuthFormPath(pathname) ||
+      pathname.startsWith("/auth/") ||
+      pathname === "/auth/role-recovery"
+    ) {
       return supabaseResponse;
     }
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("error", "profile_missing");
+    url.pathname = "/auth/role-recovery";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
