@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition, type MouseEvent } from "react";
+import { useState, useTransition, type MouseEvent } from "react";
 
 import { saveCreator, unsaveCreator } from "@/lib/marketplace/actions";
 import { appToast } from "@/lib/toast";
@@ -18,10 +18,6 @@ export function SaveCreatorButton({
   const router = useRouter();
   const [saved, setSaved] = useState(initiallySaved);
   const [pending, startTransition] = useTransition();
-
-  useEffect(() => {
-    setSaved(initiallySaved);
-  }, [initiallySaved]);
 
   function onToggle(event?: MouseEvent) {
     event?.preventDefault();

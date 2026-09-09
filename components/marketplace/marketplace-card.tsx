@@ -33,6 +33,7 @@ export function MarketplaceCreatorCard({
       <div className="relative">
         <div className="absolute right-0 top-0 z-10">
           <SaveCreatorButton
+            key={`${creator.id}:${saved ? "1" : "0"}`}
             creatorId={creator.id}
             initiallySaved={saved}
             variant="icon"

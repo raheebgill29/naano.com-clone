@@ -68,14 +68,77 @@ export function MarketplaceFilters({
   const sort = first(searchParams.sort) ?? (q ? "relevance" : "followers_desc");
   const saved = first(searchParams.saved) === "1";
 
+  // Remount when URL search changes so local draft stays aligned without effects.
+  return (
+    <MarketplaceFiltersInner
+      key={[
+        q,
+        topic,
+        language,
+        minPrice,
+        maxPrice,
+        minFollowers,
+        maxFollowers,
+        availability,
+        sort,
+        saved ? "1" : "0",
+      ].join("|")}
+      q={q}
+      topic={topic}
+      language={language}
+      minPrice={minPrice}
+      maxPrice={maxPrice}
+      minFollowers={minFollowers}
+      maxFollowers={maxFollowers}
+      availability={availability}
+      sort={sort}
+      saved={saved}
+      topics={topics}
+      languages={languages}
+      resultSummary={resultSummary}
+      onNavigate={(params) => {
+        const qs = params.toString();
+        router.push(qs ? `/brand/discover?${qs}` : "/brand/discover");
+      }}
+    />
+  );
+}
+
+function MarketplaceFiltersInner({
+  q,
+  topic,
+  language,
+  minPrice,
+  maxPrice,
+  minFollowers,
+  maxFollowers,
+  availability,
+  sort,
+  saved,
+  topics,
+  languages,
+  resultSummary,
+  onNavigate,
+}: {
+  q: string;
+  topic: string;
+  language: string;
+  minPrice: string;
+  maxPrice: string;
+  minFollowers: string;
+  maxFollowers: string;
+  availability: string;
+  sort: string;
+  saved: boolean;
+  topics: string[];
+  languages: string[];
+  resultSummary?: string;
+  onNavigate: (params: URLSearchParams) => void;
+}) {
   const [query, setQuery] = useState(q);
   const [moreOpen, setMoreOpen] = useState(false);
   const sheetTitleId = useId();
   const sheetRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setQuery(q);
-  }, [q]);
 
   useEffect(() => {
     if (!moreOpen) return;
@@ -117,18 +180,13 @@ export function MarketplaceFilters({
     return next;
   }
 
-  function navigate(params: URLSearchParams) {
-    const qs = params.toString();
-    router.push(qs ? `/brand/discover?${qs}` : "/brand/discover");
-  }
-
   function onSearchSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    navigate(buildParams({ q: query.trim() || undefined, page: undefined }));
+    onNavigate(buildParams({ q: query.trim() || undefined, page: undefined }));
   }
 
   function onSelectChange(name: string, value: string) {
-    navigate(
+    onNavigate(
       buildParams({
         [name]: value || undefined,
         page: undefined,
@@ -137,14 +195,14 @@ export function MarketplaceFilters({
   }
 
   function onSortChange(value: string) {
-    navigate(buildParams({ sort: value || undefined, page: undefined }));
+    onNavigate(buildParams({ sort: value || undefined, page: undefined }));
   }
 
   function applyMoreFilters(form: HTMLFormElement) {
     const data = new FormData(form);
     const minPriceUnits = String(data.get("minPriceUnits") ?? "");
     const maxPriceUnits = String(data.get("maxPriceUnits") ?? "");
-    navigate(
+    onNavigate(
       buildParams({
         minPrice: unitsToCents(minPriceUnits) || undefined,
         maxPrice: unitsToCents(maxPriceUnits) || undefined,
@@ -290,7 +348,7 @@ export function MarketplaceFilters({
                 className="absolute inset-y-0 right-2 my-auto inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle hover:bg-surface hover:text-ink"
                 onClick={() => {
                   setQuery("");
-                  navigate(buildParams({ q: undefined, page: undefined }));
+                  onNavigate(buildParams({ q: undefined, page: undefined }));
                 }}
               >
                 ×
@@ -371,7 +429,7 @@ export function MarketplaceFilters({
                   overrides[param] = undefined;
                 }
                 if (chip.key === "q") setQuery("");
-                navigate(buildParams(overrides));
+                onNavigate(buildParams(overrides));
               }}
               className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold text-ink transition-colors duration-150 hover:bg-page"
             >
@@ -391,11 +449,26 @@ export function MarketplaceFilters({
         </div>
       ) : null}
 
-      <ResultsToolbar
-        sort={sort}
-        onSortChange={onSortChange}
-        resultSummary={resultSummary}
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-support">
+          {resultSummary ?? "Browse creators"}
+        </p>
+        <label className="inline-flex items-center gap-2 text-sm text-support">
+          <span className="whitespace-nowrap">Sort by</span>
+          <select
+            value={sort}
+            onChange={(event) => onSortChange(event.target.value)}
+            aria-label="Sort creators"
+            className="rounded-[12px] border border-line bg-surface px-3 py-2 text-sm font-medium text-ink"
+          >
+            {Object.entries(SORT_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       {moreOpen ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
@@ -529,39 +602,6 @@ export function MarketplaceFilters({
           </div>
         </div>
       ) : null}
-    </div>
-  );
-}
-
-function ResultsToolbar({
-  sort,
-  onSortChange,
-  resultSummary,
-}: {
-  sort: string;
-  onSortChange: (value: string) => void;
-  resultSummary?: string;
-}) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-support">
-        {resultSummary ?? "Browse creators"}
-      </p>
-      <label className="inline-flex items-center gap-2 text-sm text-support">
-        <span className="whitespace-nowrap">Sort by</span>
-        <select
-          value={sort}
-          onChange={(event) => onSortChange(event.target.value)}
-          aria-label="Sort creators"
-          className="rounded-[12px] border border-line bg-surface px-3 py-2 text-sm font-medium text-ink"
-        >
-          {Object.entries(SORT_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </label>
     </div>
   );
 }
