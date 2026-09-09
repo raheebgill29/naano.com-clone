@@ -2,16 +2,12 @@
 
 import { useActionState } from "react";
 
+import { Field, FormMessage, SubmitButton, TextArea } from "@/components/auth/ui";
+import { OnboardingLayout } from "@/components/onboarding/shell";
 import {
   completeBrandOnboarding,
   type OnboardingActionState,
 } from "@/lib/auth/onboarding";
-import {
-  AuthShell,
-  Field,
-  FormMessage,
-  SubmitButton,
-} from "@/components/auth/ui";
 
 const initialState: OnboardingActionState = {};
 
@@ -22,30 +18,50 @@ export function BrandOnboardingForm({ fullName }: { fullName: string }) {
   );
 
   return (
-    <AuthShell
-      title="Brand onboarding"
-      subtitle={`Welcome, ${fullName}. Tell us about your company.`}
+    <OnboardingLayout
+      step={2}
+      totalSteps={2}
+      stepLabel="Company profile"
+      title="Set up your brand"
+      subtitle={`Welcome, ${fullName}. Add the company details brands will use across campaigns.`}
     >
-      <form action={formAction} className="space-y-4">
-        <Field label="Company name" name="company_name" required />
-        <Field
-          label="Website"
-          name="website"
-          type="url"
-          placeholder="https://"
-        />
-        <Field label="Industry" name="industry" />
-        <label className="block space-y-1.5">
-          <span className="text-sm font-medium text-zinc-800">Description</span>
-          <textarea
+      <form action={formAction} className="space-y-5">
+        <div className="space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">
+            Company
+          </p>
+          <Field label="Company name" name="company_name" required />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Website"
+              name="website"
+              type="url"
+              placeholder="https://"
+            />
+            <Field
+              label="Industry"
+              name="industry"
+              placeholder="SaaS, fintech, etc."
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4 border-t border-line pt-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">
+            Positioning
+          </p>
+          <TextArea
+            label="Description"
             name="description"
             rows={4}
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
+            placeholder="What does your company do, and who do you sell to?"
+            hint="Optional — helps creators understand your brand."
           />
-        </label>
+        </div>
+
         <FormMessage error={state.error} success={state.success} />
         <SubmitButton pending={pending}>Save and continue</SubmitButton>
       </form>
-    </AuthShell>
+    </OnboardingLayout>
   );
 }

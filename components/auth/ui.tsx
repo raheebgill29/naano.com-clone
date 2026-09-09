@@ -1,102 +1,65 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
-export function AuthShell({
+import { Wordmark } from "@/components/ui/primitives";
+
+export function AuthLayout({
   title,
   subtitle,
   children,
+  footer,
 }: {
   title: string;
   subtitle?: string;
   children: ReactNode;
+  footer?: ReactNode;
 }) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12">
-      <div className="mb-8">
-        <p className="text-sm font-medium tracking-wide text-zinc-500">Naano</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">
-          {title}
-        </h1>
-        {subtitle ? (
-          <p className="mt-2 text-sm leading-6 text-zinc-600">{subtitle}</p>
+    <div className="flex min-h-full flex-1 flex-col">
+      <header className="border-b border-line bg-surface/80">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
+          <Wordmark />
+          <Link
+            href="/"
+            className="text-sm font-medium text-ink-muted transition hover:text-ink"
+          >
+            ← Back to home
+          </Link>
+        </div>
+      </header>
+
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10 sm:px-6">
+        <div className="rounded-[var(--radius)] border border-line bg-surface p-6 shadow-[var(--shadow)] sm:p-8">
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">
+              {title}
+            </h1>
+            {subtitle ? (
+              <p className="mt-2 text-sm leading-6 text-ink-muted">{subtitle}</p>
+            ) : null}
+          </div>
+          {children}
+        </div>
+        {footer ? (
+          <div className="mt-6 text-center text-sm text-ink-muted">{footer}</div>
         ) : null}
-      </div>
-      {children}
-    </main>
+      </main>
+    </div>
   );
 }
 
-export function Field({
-  label,
-  name,
-  type = "text",
-  required,
-  placeholder,
-  defaultValue,
-  min,
-  step,
-}: {
-  label: string;
-  name: string;
-  type?: string;
-  required?: boolean;
-  placeholder?: string;
-  defaultValue?: string;
-  min?: number | string;
-  step?: number | string;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="text-sm font-medium text-zinc-800">{label}</span>
-      <input
-        className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 placeholder:text-zinc-400 focus:ring-2"
-        name={name}
-        type={type}
-        required={required}
-        placeholder={placeholder}
-        defaultValue={defaultValue}
-        min={min}
-        step={step}
-      />
-    </label>
-  );
-}
-
-export function FormMessage({
-  error,
-  success,
-}: {
-  error?: string;
-  success?: string;
-}) {
-  if (!error && !success) return null;
-  return (
-    <p
-      className={`rounded-md px-3 py-2 text-sm ${
-        error
-          ? "bg-red-50 text-red-700"
-          : "bg-emerald-50 text-emerald-700"
-      }`}
-      role="status"
-    >
-      {error ?? success}
-    </p>
-  );
-}
-
-export function SubmitButton({
-  children,
-  pending,
-}: {
+/** @deprecated Prefer AuthLayout — kept as thin alias for existing imports */
+export function AuthShell(props: {
+  title: string;
+  subtitle?: string;
   children: ReactNode;
-  pending?: boolean;
 }) {
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="inline-flex w-full items-center justify-center rounded-md bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {pending ? "Please wait…" : children}
-    </button>
-  );
+  return <AuthLayout {...props} />;
 }
+
+export {
+  Field,
+  FormMessage,
+  PrimaryButton as SubmitButton,
+  TextArea,
+} from "@/components/ui/primitives";

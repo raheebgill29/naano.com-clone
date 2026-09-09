@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Naano",
-  description: "B2B LinkedIn creator marketplace",
+  title: "Naano — B2B LinkedIn Creator Marketplace",
+  description:
+    "Discover LinkedIn creators, launch campaigns, and track collaboration results.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -23,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900">
+      <body className="min-h-full flex flex-col bg-page font-sans text-ink">
         {children}
       </body>
     </html>
