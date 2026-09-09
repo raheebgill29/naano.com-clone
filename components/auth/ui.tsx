@@ -61,7 +61,7 @@ export function Field({
   );
 }
 
-export function TextMessage({
+export function FormMessage({
   error,
   success,
 }: {

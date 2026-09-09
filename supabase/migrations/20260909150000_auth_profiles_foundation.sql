@@ -10,6 +10,7 @@ create type public.user_role as enum ('brand', 'creator');
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = timezone('utc', now());
@@ -39,6 +40,7 @@ execute function public.set_updated_at();
 create or replace function public.prevent_profile_role_change()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   if new.role is distinct from old.role then
@@ -174,7 +176,11 @@ as $$
   select role from public.profiles where id = auth.uid();
 $$;
 
+revoke all on function public.handle_new_user() from public;
+revoke all on function public.handle_new_user() from anon, authenticated;
+
 revoke all on function public.current_user_role() from public;
+revoke all on function public.current_user_role() from anon;
 grant execute on function public.current_user_role() to authenticated;
 
 -- ---------------------------------------------------------------------------
