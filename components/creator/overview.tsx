@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { PrimaryLink, SecondaryLink } from "@/components/ui/primitives";
 import {
+  PageHeader,
   formatCount,
   formatPriceCents,
   initials,
@@ -128,16 +129,11 @@ export function CreatorOverview({
 
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-sm font-medium text-support">Creator workspace</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-          Welcome back, {firstName}
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-support">
-          Review your public profile, track opportunities, and deliver accepted
-          collaborations.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Creator workspace"
+        title={`Welcome back, ${firstName}`}
+        description="Review your public profile, track opportunities, and deliver accepted collaborations."
+      />
 
       <section
         aria-label="Workspace counts"
@@ -170,7 +166,7 @@ export function CreatorOverview({
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-        <section className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
+        <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold text-ink">Creator card</h2>
@@ -180,7 +176,7 @@ export function CreatorOverview({
             </div>
           </div>
 
-          <div className="mt-5 rounded-xl border border-line bg-[#f7f8fa] p-4 sm:p-5">
+          <div className="mt-5 rounded-[12px] border border-line bg-page p-4 sm:p-5">
             <div className="flex items-start gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent">
                 {initials(profile.full_name) || "C"}
@@ -228,7 +224,7 @@ export function CreatorOverview({
           </div>
         </section>
 
-        <section className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
+        <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
           <h2 className="text-base font-semibold text-ink">Launch guide</h2>
           <p className="mt-1 text-sm text-support">
             {completed} of {checklist.length} setup steps complete
@@ -237,7 +233,7 @@ export function CreatorOverview({
             {checklist.map((item) => (
               <li
                 key={item.id}
-                className="flex items-start gap-3 rounded-lg border border-line px-3 py-2.5"
+                className="flex items-start gap-3 rounded-[12px] border border-line px-3 py-2.5"
               >
                 <span
                   className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
@@ -266,7 +262,7 @@ export function CreatorOverview({
         </section>
       </div>
 
-      <section className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
+      <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-ink">Opportunities</h2>
@@ -280,7 +276,7 @@ export function CreatorOverview({
             View opportunities
           </SecondaryLink>
         </div>
-        <div className="mt-5 rounded-xl border border-dashed border-line-strong bg-[#f7f8fa] px-4 py-8 text-center">
+        <div className="mt-5 rounded-[12px] border border-dashed border-line-strong bg-page px-4 py-8 text-center">
           <p className="text-sm font-medium text-ink">
             {(opportunityCounts?.pending ?? 0) +
               (opportunityCounts?.accepted ?? 0) +
@@ -323,7 +319,7 @@ function Metric({
   href?: string;
 }) {
   const body = (
-    <article className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)]">
+    <article className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)]">
       <p className="text-sm font-medium text-support">{label}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-ink">
         {value}
@@ -332,7 +328,10 @@ function Metric({
     </article>
   );
   return href ? (
-    <Link href={href} className="block transition hover:opacity-90">
+    <Link
+      href={href}
+      className="block rounded-[14px] transition-[opacity] duration-150 hover:opacity-95"
+    >
       {body}
     </Link>
   ) : (

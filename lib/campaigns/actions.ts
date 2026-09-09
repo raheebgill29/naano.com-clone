@@ -223,8 +223,15 @@ async function inviteCreatorToCampaignInternal({
     .maybeSingle();
   if (!campaign) return { error: "Campaign not found." };
 
-  // Archived campaigns cannot accept new invites in this slice
-  if (campaign.status === "archived") return { error: "Campaign is archived." };
+  // Archived / paused / completed cannot accept new invites
+  if (!["draft", "active"].includes(campaign.status)) {
+    return {
+      error:
+        campaign.status === "paused"
+          ? "This campaign is paused and cannot accept new invitations."
+          : "This campaign cannot accept new invitations.",
+    };
+  }
 
   const { data: creator } = await supabase
     .from("creators")
@@ -260,6 +267,47 @@ async function inviteCreatorToCampaignInternal({
   return { error: error.message };
 }
 
+export async function transitionCampaignAction(
+  _prev: CampaignFormActionState,
+  formData: FormData,
+): Promise<CampaignFormActionState> {
+  await requireRole("brand");
+  const campaignId = trimString(formData.get("campaign_id"));
+  const action = trimString(formData.get("action"));
+  if (!campaignId) return { error: "Missing campaign id." };
+  if (!action) return { error: "Missing campaign action." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("campaign_transition", {
+    p_campaign_id: campaignId,
+    p_action: action,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/brand/campaigns");
+  revalidatePath(`/brand/campaigns/${campaignId}`);
+  revalidatePath("/brand/dashboard");
+  revalidatePath("/brand/discover");
+  revalidatePath("/brand/shortlist");
+  revalidatePath("/creator/opportunities");
+  revalidatePath("/creator/collaborations");
+  revalidatePath("/creator/dashboard");
+  revalidatePath("/creator", "layout");
+  revalidatePath("/brand", "layout");
+
+  const successLabel: Record<string, string> = {
+    activate: "Campaign activated.",
+    pause: "Campaign paused.",
+    resume: "Campaign resumed.",
+    complete: "Campaign marked complete.",
+    archive: "Campaign archived.",
+  };
+
+  return { success: successLabel[action] ?? "Campaign updated." };
+}
+
+/** @deprecated Prefer transitionCampaignAction with action=archive */
 export async function archiveCampaign(formData: FormData): Promise<void> {
   const { userId } = await requireRole("brand");
   const supabase = await createClient();
@@ -278,34 +326,20 @@ export async function archiveCampaign(formData: FormData): Promise<void> {
     redirect("/brand/campaigns?error=brand-missing");
   }
 
-  const { data: campaign } = await supabase
-    .from("campaigns")
-    .select("id,status")
-    .eq("id", campaignId)
-    .eq("brand_id", brand.id)
-    .maybeSingle();
+  const { error } = await supabase.rpc("campaign_transition", {
+    p_campaign_id: campaignId,
+    p_action: "archive",
+  });
 
-  if (!campaign || campaign.status !== "draft") {
-    redirect(`/brand/campaigns/${campaignId}`);
+  if (error) {
+    redirect(
+      `/brand/campaigns/${campaignId}?error=${encodeURIComponent(error.message)}`,
+    );
   }
-
-  const nowIso = new Date().toISOString();
-  await supabase
-    .from("campaigns")
-    .update({ status: "archived" satisfies CampaignStatus })
-    .eq("id", campaignId);
-
-  await supabase
-    .from("campaign_creators")
-    .update({
-      status: "cancelled" satisfies CampaignCreatorStatus,
-      cancelled_at: nowIso,
-    })
-    .eq("campaign_id", campaignId)
-    .eq("status", "booking_pending");
 
   revalidatePath("/brand/campaigns");
   revalidatePath(`/brand/campaigns/${campaignId}`);
+  revalidatePath("/brand/dashboard");
   redirect("/brand/campaigns");
 }
 

@@ -2,10 +2,16 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const primaryBtn =
-  "inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center rounded-[12px] bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-[background-color,box-shadow,opacity] duration-150 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60";
 
 const secondaryBtn =
-  "inline-flex items-center justify-center rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-page disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center rounded-[12px] border border-line-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition-[background-color,border-color,opacity] duration-150 hover:bg-page disabled:cursor-not-allowed disabled:opacity-60";
+
+const quietBtn =
+  "inline-flex items-center justify-center rounded-[12px] px-3 py-2 text-sm font-semibold text-ink-muted transition-[background-color,color,opacity] duration-150 hover:bg-page hover:text-ink disabled:cursor-not-allowed disabled:opacity-60";
+
+const destructiveBtn =
+  "inline-flex items-center justify-center rounded-[12px] border border-line bg-surface px-4 py-2.5 text-sm font-semibold text-danger transition-[background-color,border-color,opacity] duration-150 hover:border-danger/30 hover:bg-danger-soft disabled:cursor-not-allowed disabled:opacity-60";
 
 export function PrimaryButton({
   children,
@@ -55,6 +61,38 @@ export function SecondaryLink({
   );
 }
 
+export function QuietLink({
+  href,
+  children,
+  className = "",
+}: {
+  href: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <Link href={href} className={`${quietBtn} ${className}`}>
+      {children}
+    </Link>
+  );
+}
+
+export function DestructiveButton({
+  children,
+  pending,
+  type = "submit",
+}: {
+  children: ReactNode;
+  pending?: boolean;
+  type?: "submit" | "button";
+}) {
+  return (
+    <button type={type} disabled={pending} className={destructiveBtn}>
+      {pending ? "Please wait…" : children}
+    </button>
+  );
+}
+
 export function Wordmark({ className = "" }: { className?: string }) {
   return (
     <Link
@@ -67,7 +105,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
 }
 
 const fieldClass =
-  "w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-subtle transition hover:border-line-strong focus:border-accent";
+  "w-full rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-subtle transition-[border-color,box-shadow] duration-150 hover:border-line-strong focus:border-accent";
 
 export function Field({
   label,

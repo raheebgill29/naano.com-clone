@@ -31,9 +31,9 @@ export function MessagingWorkspace({
   const showConversation = Boolean(activeId && conversation);
 
   return (
-    <div className="-mx-4 -my-6 flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col sm:-mx-6 sm:-my-8 lg:-mx-8">
-      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
-        <div className="flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow)]">
+    <div className="-mx-4 -my-6 flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col sm:-mx-6 sm:-my-7 lg:-mx-8">
+      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+        <div className="flex min-h-0 flex-1 overflow-hidden rounded-[14px] border border-line bg-surface shadow-[var(--shadow-sm)]">
           <aside
             className={`min-h-0 w-full shrink-0 border-r border-line md:w-[340px] ${
               showConversation ? "hidden md:flex md:flex-col" : "flex flex-col"

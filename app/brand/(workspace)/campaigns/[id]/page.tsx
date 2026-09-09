@@ -3,17 +3,25 @@ import { notFound } from "next/navigation";
 
 import { ConfirmButton } from "@/components/campaigns/ConfirmButton";
 import { CampaignForm } from "@/components/campaigns/CampaignForm";
+import { CampaignLifecycleMenu } from "@/components/campaigns/lifecycle-menu";
 import { LoadErrorToast } from "@/components/ui/load-error-toast";
 import {
   EmptyState,
   PageHeader,
   formatPriceCents,
 } from "@/components/workspace/ui";
-import { archiveCampaign, withdrawInvitation } from "@/lib/campaigns/actions";
+import { withdrawInvitation } from "@/lib/campaigns/actions";
+import {
+  CAMPAIGN_STATUS_LABEL,
+  campaignIsReadOnly,
+} from "@/lib/campaigns/status";
 import { requireRole } from "@/lib/auth/session";
 import { STATUS_LABEL } from "@/lib/collaborations/queries";
 import { createClient } from "@/lib/supabase/server";
-import type { CampaignCreatorStatus } from "@/lib/supabase/database.types";
+import type {
+  CampaignCreatorStatus,
+  CampaignStatus,
+} from "@/lib/supabase/database.types";
 
 const ACTIVE_COST_STATUSES: CampaignCreatorStatus[] = [
   "accepted",
@@ -127,13 +135,14 @@ export default async function BrandCampaignDetailPage({
     .reduce((sum, i) => sum + i.price_cents * i.post_count_snapshot, 0);
 
   const canEdit = campaign.status === "draft";
+  const readOnlyCampaign = campaignIsReadOnly(campaign.status as CampaignStatus);
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Campaign detail"
         title={campaign.campaign_name}
-        description={`${campaign.product_or_company} · ${campaign.status}`}
+        description={`${campaign.product_or_company} · ${CAMPAIGN_STATUS_LABEL[campaign.status as CampaignStatus]}`}
         actions={
           <Link
             href="/brand/campaigns"
@@ -143,6 +152,17 @@ export default async function BrandCampaignDetailPage({
           </Link>
         }
       />
+
+      <section className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)]">
+        <h2 className="text-base font-semibold text-ink">Campaign status</h2>
+        <div className="mt-3">
+          <CampaignLifecycleMenu
+            campaignId={campaign.id}
+            status={campaign.status as CampaignStatus}
+            invitations={invitations}
+          />
+        </div>
+      </section>
 
       <section className="grid gap-4 sm:grid-cols-3">
         <article className="rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow)]">
@@ -172,12 +192,6 @@ export default async function BrandCampaignDetailPage({
         {canEdit ? (
           <div className="mt-4">
             <CampaignForm campaign={campaign} campaignId={campaign.id} />
-            <form action={archiveCampaign} className="mt-4 max-w-xs">
-              <input type="hidden" name="campaign_id" value={campaign.id} />
-              <ConfirmButton confirmText="Archive this draft and withdraw pending invitations?">
-                Archive draft
-              </ConfirmButton>
-            </form>
           </div>
         ) : (
           <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
@@ -220,6 +234,14 @@ export default async function BrandCampaignDetailPage({
                 {new Date(campaign.target_publish_date).toLocaleDateString()}
               </dd>
             </div>
+            {readOnlyCampaign ? (
+              <div>
+                <dt className="text-ink-subtle">Read-only</dt>
+                <dd className="mt-0.5 text-ink">
+                  Brief editing is locked for completed and archived campaigns.
+                </dd>
+              </div>
+            ) : null}
           </dl>
         )}
       </section>
@@ -227,12 +249,19 @@ export default async function BrandCampaignDetailPage({
       <section className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-base font-semibold text-ink">Invited creators</h2>
-          <Link
-            href="/brand/discover"
-            className="text-sm font-semibold text-accent hover:text-accent-hover"
-          >
-            Invite from marketplace
-          </Link>
+          {!readOnlyCampaign &&
+          (campaign.status === "draft" || campaign.status === "active") ? (
+            <Link
+              href="/brand/discover"
+              className="text-sm font-semibold text-accent hover:text-accent-hover"
+            >
+              Invite from marketplace
+            </Link>
+          ) : (
+            <p className="text-xs text-support">
+              New invitations are unavailable for this campaign status.
+            </p>
+          )}
         </div>
 
         {inviteError ? (

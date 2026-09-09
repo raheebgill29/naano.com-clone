@@ -10,6 +10,7 @@ type CampaignSummary = {
   deliverable_type: string;
   target_publish_date: string;
   brand_id: string;
+  status?: Campaign["status"];
 };
 
 type BrandSummary = {
@@ -21,6 +22,7 @@ function reduceCounts(items: { status: Campaign["status"] }[]): BrandCampaignCou
   return {
     draft: items.filter((i) => i.status === "draft").length,
     active: items.filter((i) => i.status === "active").length,
+    paused: items.filter((i) => i.status === "paused").length,
     completed: items.filter((i) => i.status === "completed").length,
     archived: items.filter((i) => i.status === "archived").length,
   };
@@ -148,7 +150,7 @@ export async function getCreatorOpportunities({
     ? await supabase
         .from("campaigns")
         .select(
-          "id,campaign_name,product_or_company,deliverable_type,target_publish_date,brand_id,objective,description,key_messages,creator_guidelines,post_count",
+          "id,campaign_name,product_or_company,deliverable_type,target_publish_date,brand_id,objective,description,key_messages,creator_guidelines,post_count,status",
         )
         .in("id", campaignIds)
     : { data: [] as CampaignSummary[] };

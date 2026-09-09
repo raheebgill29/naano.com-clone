@@ -47,7 +47,7 @@ export function CreatorPublicCard({
               className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                 creator.availability === "available"
                   ? "bg-success-soft text-success"
-                  : "bg-[#f7f8fa] text-support"
+                  : "bg-page text-support"
               }`}
             >
               {creator.availability === "available"
@@ -80,7 +80,7 @@ export function CreatorPublicCard({
           {creator.topics.slice(0, compact ? 3 : 6).map((topic) => (
             <li
               key={topic}
-              className="rounded-md bg-[#f7f8fa] px-2 py-1 text-xs font-medium text-ink-muted"
+              className="rounded-[8px] bg-page px-2 py-1 text-xs font-medium text-ink-muted"
             >
               {topic}
             </li>
@@ -95,7 +95,7 @@ export function CreatorPublicCard({
   );
 
   return (
-    <article className="rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow)] transition hover:border-line-strong">
+    <article className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 hover:border-line-strong hover:shadow-[var(--shadow)]">
       {href ? (
         <Link href={href} className="block">
           {content}

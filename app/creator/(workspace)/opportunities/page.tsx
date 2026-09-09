@@ -6,8 +6,15 @@ import {
   formatPriceCents,
 } from "@/components/workspace/ui";
 import { requireRole } from "@/lib/auth/session";
+import {
+  CAMPAIGN_STATUS_LABEL,
+  campaignStatusBadgeClass,
+} from "@/lib/campaigns/status";
 import { createClient } from "@/lib/supabase/server";
-import type { CampaignCreatorStatus } from "@/lib/supabase/database.types";
+import type {
+  CampaignCreatorStatus,
+  CampaignStatus,
+} from "@/lib/supabase/database.types";
 
 const STATUS_LABEL: Record<
   Extract<CampaignCreatorStatus, "booking_pending" | "accepted" | "declined">,
@@ -72,7 +79,7 @@ export default async function CreatorOpportunitiesPage({
     ? await supabase
         .from("campaigns")
         .select(
-          "id,campaign_name,product_or_company,deliverable_type,target_publish_date,brand_id",
+          "id,campaign_name,product_or_company,deliverable_type,target_publish_date,brand_id,status",
         )
         .in("id", campaignIds)
     : { data: [] as Array<{
@@ -82,6 +89,7 @@ export default async function CreatorOpportunitiesPage({
         deliverable_type: string;
         target_publish_date: string;
         brand_id: string;
+        status: CampaignStatus;
       }> };
 
   const brandIds = Array.from(
@@ -192,6 +200,13 @@ export default async function CreatorOpportunitiesPage({
                           opp.status as keyof typeof STATUS_LABEL
                         ] ?? opp.status}
                       </span>
+                      {opp.campaign?.status ? (
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${campaignStatusBadgeClass(opp.campaign.status)}`}
+                        >
+                          Campaign {CAMPAIGN_STATUS_LABEL[opp.campaign.status]}
+                        </span>
+                      ) : null}
                     </div>
                     <p className="mt-1 text-sm text-support">
                       {opp.brand?.company_name ?? "Brand"} ·{" "}

@@ -33,12 +33,12 @@ export function CollaborationStatusBadge({
       : status === "cancelled" || status === "declined"
         ? "bg-danger-soft text-danger"
         : status === "revision_requested" || status === "draft_submitted"
-          ? "bg-[#fff7ed] text-[#c2410c]"
+          ? "bg-warning-soft text-warning"
           : "bg-accent-soft text-accent";
 
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold ${tone}`}
+      className={`inline-flex items-center rounded-[8px] px-2 py-0.5 text-[11px] font-semibold ${tone}`}
     >
       {STATUS_LABEL[status]}
     </span>

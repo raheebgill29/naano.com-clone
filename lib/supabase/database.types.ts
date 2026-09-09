@@ -1,7 +1,12 @@
 export type UserRole = "brand" | "creator";
 export type PublicationStatus = "draft" | "published";
 export type AvailabilityStatus = "available" | "unavailable";
-export type CampaignStatus = "draft" | "active" | "completed" | "archived";
+export type CampaignStatus =
+  | "draft"
+  | "active"
+  | "paused"
+  | "completed"
+  | "archived";
 export type CampaignCreatorStatus =
   | "booking_pending"
   | "accepted"
@@ -81,6 +86,10 @@ export type Campaign = {
   currency: string;
   budget_cents: number;
   status: CampaignStatus;
+  activated_at: string | null;
+  paused_at: string | null;
+  completed_at: string | null;
+  archived_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -422,6 +431,13 @@ export type Database = {
           p_full_name: string;
         };
         Returns: Profile;
+      };
+      campaign_transition: {
+        Args: {
+          p_campaign_id: string;
+          p_action: string;
+        };
+        Returns: Campaign;
       };
       collab_submit_draft: {
         Args: {

@@ -5,6 +5,7 @@ import {
   PublishUrlForm,
   SubmitDraftForm,
 } from "@/components/collaborations/forms";
+import { CampaignStatusCallout } from "@/components/campaigns/status-callout";
 import { CollaborationLiveRefresh } from "@/lib/collaborations/use-collaboration-live";
 import {
   EmptyState,
@@ -17,6 +18,7 @@ import {
   getCollaborationDetail,
   nextActionForStatus,
 } from "@/lib/collaborations/queries";
+import type { CampaignStatus } from "@/lib/supabase/database.types";
 
 export default async function CreatorCollaborationDetailPage({
   params,
@@ -49,7 +51,10 @@ export default async function CreatorCollaborationDetailPage({
 
   return (
     <div className="space-y-6">
-      <CollaborationLiveRefresh collaborationId={collab.id} />
+      <CollaborationLiveRefresh
+        collaborationId={collab.id}
+        campaignId={campaign.id}
+      />
       <PageHeader
         eyebrow="Collaboration"
         title={campaign.campaign_name}
@@ -71,6 +76,8 @@ export default async function CreatorCollaborationDetailPage({
           </div>
         }
       />
+
+      <CampaignStatusCallout status={campaign.status as CampaignStatus} />
 
       <p className="rounded-lg border border-accent/20 bg-accent-soft px-4 py-3 text-sm font-medium text-accent">
         Next: {nextActionForStatus(collab.status, "creator")}

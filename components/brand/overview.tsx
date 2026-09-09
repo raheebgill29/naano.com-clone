@@ -87,7 +87,7 @@ export function BrandOverview({
       </p>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
+        <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
           <h2 className="text-base font-semibold text-ink">Company profile</h2>
           <dl className="mt-4 space-y-3 text-sm">
             <div>
@@ -120,10 +120,10 @@ export function BrandOverview({
           </dl>
         </section>
 
-        <section className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
+        <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
           <h2 className="text-base font-semibold text-ink">Next steps</h2>
           <ul className="mt-4 space-y-3 text-sm">
-            <li className="rounded-lg border border-line px-3 py-3">
+            <li className="rounded-[12px] border border-line px-3 py-3">
               <p className="font-medium text-ink">Explore the marketplace</p>
               <p className="mt-1 text-support">
                 Browse creator profiles with fixed per-post pricing.
@@ -135,7 +135,7 @@ export function BrandOverview({
                 Open marketplace
               </Link>
             </li>
-            <li className="rounded-lg border border-line px-3 py-3">
+            <li className="rounded-[12px] border border-line px-3 py-3">
               <p className="font-medium text-ink">Review collaborations</p>
               <p className="mt-1 text-support">
                 Approve drafts, schedule posts, and mark work complete.
@@ -151,7 +151,7 @@ export function BrandOverview({
         </section>
       </div>
 
-      <section className="rounded-xl border border-dashed border-line-strong bg-surface px-6 py-10 text-center">
+      <section className="rounded-[14px] border border-dashed border-line-strong bg-surface px-6 py-10 text-center">
         <h2 className="text-base font-semibold text-ink">
           {activeCampaigns +
             activeCollaborations +
@@ -181,7 +181,7 @@ function Metric({
   href?: string;
 }) {
   const body = (
-    <article className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)]">
+    <article className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150">
       <p className="text-sm font-medium text-support">{label}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-ink">
         {value}
@@ -189,7 +189,10 @@ function Metric({
     </article>
   );
   return href ? (
-    <Link href={href} className="block transition hover:opacity-90">
+    <Link
+      href={href}
+      className="block rounded-[14px] transition-[opacity] duration-150 hover:opacity-95"
+    >
       {body}
     </Link>
   ) : (

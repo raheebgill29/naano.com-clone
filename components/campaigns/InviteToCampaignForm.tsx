@@ -29,7 +29,10 @@ export function InviteToCampaignForm({
   );
 
   const options = useMemo(
-    () => (campaigns ?? []).filter((c) => c.status !== "archived"),
+    () =>
+      (campaigns ?? []).filter(
+        (c) => c.status === "draft" || c.status === "active",
+      ),
     [campaigns],
   );
 

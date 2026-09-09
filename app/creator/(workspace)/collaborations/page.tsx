@@ -7,11 +7,18 @@ import {
 } from "@/components/workspace/ui";
 import { requireRole } from "@/lib/auth/session";
 import {
+  CAMPAIGN_STATUS_LABEL,
+  campaignStatusBadgeClass,
+} from "@/lib/campaigns/status";
+import {
   STATUS_LABEL,
   listCreatorCollaborations,
   nextActionForStatus,
 } from "@/lib/collaborations/queries";
-import type { CampaignCreatorStatus } from "@/lib/supabase/database.types";
+import type {
+  CampaignCreatorStatus,
+  CampaignStatus,
+} from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
 function first(value: string | string[] | undefined) {
@@ -117,6 +124,20 @@ export default async function CreatorCollaborationsPage({
                       <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[11px] font-semibold text-support">
                         {STATUS_LABEL[item.status as CampaignCreatorStatus]}
                       </span>
+                      {item.campaign &&
+                      "status" in item.campaign &&
+                      item.campaign.status ? (
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${campaignStatusBadgeClass(item.campaign.status as CampaignStatus)}`}
+                        >
+                          Campaign{" "}
+                          {
+                            CAMPAIGN_STATUS_LABEL[
+                              item.campaign.status as CampaignStatus
+                            ]
+                          }
+                        </span>
+                      ) : null}
                     </div>
                     <p className="mt-1 text-sm text-support">
                       {item.brand?.company_name ?? "Brand"} ·{" "}

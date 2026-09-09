@@ -1,6 +1,10 @@
 import Link from "next/link";
 
 import { EmptyState, PageHeader, formatPriceCents } from "@/components/workspace/ui";
+import {
+  CAMPAIGN_STATUS_LABEL,
+  campaignStatusBadgeClass,
+} from "@/lib/campaigns/status";
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import type { CampaignStatus } from "@/lib/supabase/database.types";
@@ -9,12 +13,7 @@ function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-const STATUS_LABEL: Record<CampaignStatus, string> = {
-  draft: "Draft",
-  active: "Active",
-  completed: "Completed",
-  archived: "Archived",
-};
+type ListFilter = CampaignStatus | "open";
 
 export default async function BrandCampaignsPage({
   searchParams,
@@ -23,8 +22,7 @@ export default async function BrandCampaignsPage({
 }) {
   const { userId } = await requireRole("brand");
   const params = await searchParams;
-  const statusFilter =
-    (first(params.status) as CampaignStatus | "all" | undefined) ?? "all";
+  const statusFilter = (first(params.status) as ListFilter | undefined) ?? "open";
 
   const supabase = await createClient();
   const { data: brand } = await supabase
@@ -47,15 +45,19 @@ export default async function BrandCampaignsPage({
     .select("id,status")
     .eq("brand_id", brand.id);
 
-  const counts = {
+  const counts: Record<CampaignStatus, number> = {
     draft: 0,
     active: 0,
+    paused: 0,
     completed: 0,
     archived: 0,
   };
   for (const row of allCampaigns ?? []) {
-    counts[row.status] += 1;
+    counts[row.status as CampaignStatus] += 1;
   }
+  const openCount = (allCampaigns ?? []).filter(
+    (c) => c.status !== "archived",
+  ).length;
 
   let listQuery = supabase
     .from("campaigns")
@@ -65,20 +67,23 @@ export default async function BrandCampaignsPage({
     .eq("brand_id", brand.id)
     .order("created_at", { ascending: false });
 
-  if (statusFilter !== "all") {
+  if (statusFilter === "open") {
+    listQuery = listQuery.neq("status", "archived");
+  } else {
     listQuery = listQuery.eq("status", statusFilter);
   }
 
   const { data: campaigns, error } = await listQuery;
 
   const filters: Array<{
-    key: "all" | CampaignStatus;
+    key: ListFilter;
     label: string;
     count: number;
   }> = [
-    { key: "all", label: "All", count: (allCampaigns ?? []).length },
+    { key: "open", label: "All", count: openCount },
     { key: "draft", label: "Draft", count: counts.draft },
     { key: "active", label: "Active", count: counts.active },
+    { key: "paused", label: "Paused", count: counts.paused },
     { key: "completed", label: "Completed", count: counts.completed },
     { key: "archived", label: "Archived", count: counts.archived },
   ];
@@ -88,11 +93,11 @@ export default async function BrandCampaignsPage({
       <PageHeader
         eyebrow="Campaigns"
         title="Campaigns"
-        description="Create briefs, invite creators, and track invitation status."
+        description="Create briefs, invite creators, and manage campaign lifecycle."
         actions={
           <Link
             href="/brand/campaigns/new"
-            className="rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
+            className="inline-flex items-center justify-center rounded-[12px] bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-accent-hover"
           >
             Create campaign
           </Link>
@@ -103,17 +108,17 @@ export default async function BrandCampaignsPage({
         {filters.map((filter) => {
           const active = statusFilter === filter.key;
           const href =
-            filter.key === "all"
+            filter.key === "open"
               ? "/brand/campaigns"
               : `/brand/campaigns?status=${filter.key}`;
           return (
             <Link
               key={filter.key}
               href={href}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+              className={`rounded-[10px] px-3 py-1.5 text-xs font-semibold transition-colors duration-150 ${
                 active
-                  ? "bg-accent text-white"
-                  : "border border-line bg-surface text-ink hover:bg-[#f7f8fa]"
+                  ? "bg-accent-soft text-accent"
+                  : "border border-line bg-surface text-ink-muted hover:bg-page hover:text-ink"
               }`}
             >
               {filter.label} ({filter.count})
@@ -130,9 +135,9 @@ export default async function BrandCampaignsPage({
       ) : (campaigns ?? []).length === 0 ? (
         <EmptyState
           title={
-            statusFilter === "all"
+            statusFilter === "open"
               ? "No campaigns yet"
-              : `No ${STATUS_LABEL[statusFilter as CampaignStatus].toLowerCase()} campaigns`
+              : `No ${CAMPAIGN_STATUS_LABEL[statusFilter as CampaignStatus].toLowerCase()} campaigns`
           }
           description="Create a campaign brief, then invite published creators from the marketplace."
           action={
@@ -150,7 +155,7 @@ export default async function BrandCampaignsPage({
             <li key={campaign.id}>
               <Link
                 href={`/brand/campaigns/${campaign.id}`}
-                className="block rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow)] transition hover:border-line-strong"
+                className="block rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 hover:border-line-strong hover:shadow-[var(--shadow)]"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -158,8 +163,10 @@ export default async function BrandCampaignsPage({
                       <h2 className="text-base font-semibold text-ink">
                         {campaign.campaign_name}
                       </h2>
-                      <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[11px] font-semibold text-support">
-                        {STATUS_LABEL[campaign.status]}
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${campaignStatusBadgeClass(campaign.status as CampaignStatus)}`}
+                      >
+                        {CAMPAIGN_STATUS_LABEL[campaign.status as CampaignStatus]}
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-support">

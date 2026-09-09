@@ -120,7 +120,7 @@ export function NotificationsBell({
     <div className="relative" ref={rootRef}>
       <button
         type="button"
-        className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line text-support"
+        className="relative inline-flex h-10 w-10 items-center justify-center rounded-[12px] border border-line text-support transition-colors duration-150 hover:bg-page hover:text-ink"
         aria-label={
           visibleUnread > 0
             ? `Notifications, ${visibleUnread} unread`
@@ -146,7 +146,7 @@ export function NotificationsBell({
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-line bg-surface p-2 shadow-[var(--shadow)]"
+          className="absolute right-0 z-30 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-[14px] border border-line bg-surface p-2 shadow-[var(--shadow)]"
         >
           <div className="flex items-center justify-between gap-2 px-2 py-1.5">
             <p className="text-sm font-semibold text-ink">Notifications</p>
@@ -179,7 +179,7 @@ export function NotificationsBell({
                   <Link
                     href={item.href}
                     role="menuitem"
-                    className={`flex w-full flex-col rounded-lg px-3 py-2.5 text-left hover:bg-[#f7f8fa] ${
+                    className={`flex w-full flex-col rounded-[12px] px-3 py-2.5 text-left transition-colors duration-150 hover:bg-page ${
                       item.read_at ? "opacity-80" : ""
                     }`}
                     onClick={() => {

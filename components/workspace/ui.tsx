@@ -10,7 +10,7 @@ export function StatCard({
   hint?: string;
 }) {
   return (
-    <article className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)]">
+    <article className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)]">
       <p className="text-sm font-medium text-support">{label}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-ink">
         {value}
@@ -30,12 +30,14 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-line-strong bg-surface px-6 py-10 text-center">
+    <div className="rounded-[14px] border border-dashed border-line-strong bg-surface px-6 py-12 text-center">
       <h2 className="text-base font-semibold text-ink">{title}</h2>
       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-support">
         {description}
       </p>
-      {action ? <div className="mt-5 flex justify-center gap-3">{action}</div> : null}
+      {action ? (
+        <div className="mt-5 flex flex-wrap justify-center gap-2">{action}</div>
+      ) : null}
     </div>
   );
 }
@@ -52,12 +54,18 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="mb-1 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="text-sm font-medium text-support">{eyebrow}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.06em] text-ink-subtle">
+            {eyebrow}
+          </p>
         ) : null}
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+        <h1
+          className={`text-2xl font-semibold tracking-tight text-ink sm:text-[1.75rem] sm:leading-tight ${
+            eyebrow ? "mt-1.5" : ""
+          }`}
+        >
           {title}
         </h1>
         {description ? (
@@ -67,7 +75,9 @@ export function PageHeader({
         ) : null}
       </div>
       {actions ? (
-        <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {actions}
+        </div>
       ) : null}
     </div>
   );

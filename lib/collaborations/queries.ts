@@ -49,7 +49,7 @@ export async function listCreatorCollaborations({
     ? await supabase
         .from("campaigns")
         .select(
-          "id,campaign_name,product_or_company,deliverable_type,target_publish_date,brand_id",
+          "id,campaign_name,product_or_company,deliverable_type,target_publish_date,brand_id,status",
         )
         .in("id", campaignIds)
     : { data: [] as Array<{
@@ -59,6 +59,7 @@ export async function listCreatorCollaborations({
         deliverable_type: string;
         target_publish_date: string;
         brand_id: string;
+        status: string;
       }> };
 
   const brandIds = Array.from(new Set((campaigns ?? []).map((c) => c.brand_id)));

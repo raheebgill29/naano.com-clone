@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ConfirmButton } from "@/components/campaigns/ConfirmButton";
+import { CampaignStatusCallout } from "@/components/campaigns/status-callout";
+import { CollaborationLiveRefresh } from "@/lib/collaborations/use-collaboration-live";
 import {
   EmptyState,
   PageHeader,
@@ -13,6 +15,7 @@ import {
 } from "@/lib/campaigns/actions";
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import type { CampaignStatus } from "@/lib/supabase/database.types";
 
 export default async function CreatorOpportunityDetailPage({
   params,
@@ -79,10 +82,14 @@ export default async function CreatorOpportunityDetailPage({
 
   return (
     <div className="space-y-6">
+      <CollaborationLiveRefresh
+        collaborationId={invitation.id}
+        campaignId={campaign.id}
+      />
       <PageHeader
         eyebrow="Opportunity"
         title={campaign.campaign_name}
-        description={`${brand?.company_name ?? "Brand"} · ${invitation.status}`}
+        description={`${brand?.company_name ?? "Brand"} · invitation ${invitation.status === "booking_pending" ? "pending" : invitation.status}`}
         actions={
           <Link
             href="/creator/opportunities"
@@ -92,6 +99,8 @@ export default async function CreatorOpportunityDetailPage({
           </Link>
         }
       />
+
+      <CampaignStatusCallout status={campaign.status as CampaignStatus} />
 
       <section className="grid gap-4 sm:grid-cols-3">
         <article className="rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow)]">
