@@ -122,6 +122,7 @@ export function TextArea({
   rows = 3,
   required,
   placeholder,
+  defaultValue,
   hint,
 }: {
   label: string;
@@ -129,6 +130,7 @@ export function TextArea({
   rows?: number;
   required?: boolean;
   placeholder?: string;
+  defaultValue?: string;
   hint?: string;
 }) {
   const id = name;
@@ -145,6 +147,7 @@ export function TextArea({
         required={required}
         placeholder={placeholder}
         className={`${fieldClass} resize-y`}
+        defaultValue={defaultValue}
       />
       {hint ? <p className="text-xs text-ink-subtle">{hint}</p> : null}
     </div>

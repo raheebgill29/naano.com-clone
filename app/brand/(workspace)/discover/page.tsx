@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MarketplaceFilters } from "@/components/marketplace/filters";
 import { CreatorPublicCard } from "@/components/marketplace/creator-card";
 import { SaveCreatorButton } from "@/components/marketplace/save-button";
+import { InviteToCampaignForm } from "@/components/campaigns/InviteToCampaignForm";
 import { EmptyState, PageHeader } from "@/components/workspace/ui";
 import { requireRole } from "@/lib/auth/session";
 import {
@@ -47,6 +48,12 @@ export default async function BrandDiscoverPage({
       />
     );
   }
+
+  const { data: eligibleCampaigns } = await supabase
+    .from("campaigns")
+    .select("id,campaign_name,status")
+    .eq("brand_id", brand.id)
+    .in("status", ["draft", "active"]);
 
   const { ids: savedIds } = await getSavedCreatorIds(brand.id);
 
@@ -166,10 +173,16 @@ export default async function BrandDiscoverPage({
                   creator={creator}
                   href={`/brand/creators/${creator.slug}`}
                   actions={
-                    <SaveCreatorButton
-                      creatorId={creator.id}
-                      initiallySaved={savedIds.has(creator.id)}
-                    />
+                    <div className="space-y-3">
+                      <SaveCreatorButton
+                        creatorId={creator.id}
+                        initiallySaved={savedIds.has(creator.id)}
+                      />
+                      <InviteToCampaignForm
+                        creatorId={creator.id}
+                        campaigns={eligibleCampaigns ?? []}
+                      />
+                    </div>
                   }
                 />
               </li>

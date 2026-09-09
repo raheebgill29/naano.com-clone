@@ -7,11 +7,20 @@ import type { Brand, Profile } from "@/lib/supabase/database.types";
 export function BrandOverview({
   profile,
   brand,
+  metrics,
 }: {
   profile: Profile;
   brand: Brand | null;
+  metrics?: {
+    activeCampaigns: number;
+    creatorsBooked: number;
+    pendingInvites: number;
+  };
 }) {
   const company = brand?.company_name || "your brand";
+  const activeCampaigns = metrics?.activeCampaigns ?? 0;
+  const creatorsBooked = metrics?.creatorsBooked ?? 0;
+  const pendingInvites = metrics?.pendingInvites ?? 0;
 
   return (
     <div className="space-y-8">
@@ -24,7 +33,7 @@ export function BrandOverview({
             <PrimaryLink href="/brand/discover" className="!w-auto">
               Explore creators
             </PrimaryLink>
-            <SecondaryLink href="/brand/campaigns" className="!w-auto">
+            <SecondaryLink href="/brand/campaigns/new" className="!w-auto">
               Create campaign
             </SecondaryLink>
           </>
@@ -35,10 +44,10 @@ export function BrandOverview({
         aria-label="Campaign metrics"
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
-        <Metric label="Active campaigns" value="0" />
-        <Metric label="Creators booked" value="0" />
-        <Metric label="Pending reviews" value="0" />
-        <Metric label="Published posts" value="0" />
+        <Metric label="Active campaigns" value={String(activeCampaigns)} />
+        <Metric label="Creators booked" value={String(creatorsBooked)} />
+        <Metric label="Pending invitations" value={String(pendingInvites)} />
+        <Metric label="Published posts" value="—" />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -93,13 +102,13 @@ export function BrandOverview({
             <li className="rounded-lg border border-line px-3 py-3">
               <p className="font-medium text-ink">Create a campaign brief</p>
               <p className="mt-1 text-support">
-                Campaign creation is scaffolding for now—start from Campaigns.
+                Write the brief, invite creators, and track invitation status.
               </p>
               <Link
-                href="/brand/campaigns"
+                href="/brand/campaigns/new"
                 className="mt-2 inline-block font-semibold text-accent hover:text-accent-hover"
               >
-                Go to campaigns
+                Create campaign
               </Link>
             </li>
           </ul>
@@ -108,11 +117,13 @@ export function BrandOverview({
 
       <section className="rounded-xl border border-dashed border-line-strong bg-surface px-6 py-10 text-center">
         <h2 className="text-base font-semibold text-ink">
-          No campaign activity yet
+          {activeCampaigns + creatorsBooked + pendingInvites === 0
+            ? "No campaign activity yet"
+            : "Campaign activity started"}
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-support">
-          Performance charts stay empty until you book creators and collaborations
-          produce real results. We will not invent demo metrics here.
+          Performance charts stay empty until collaborations produce published
+          posts. We will not invent demo metrics here.
         </p>
       </section>
     </div>

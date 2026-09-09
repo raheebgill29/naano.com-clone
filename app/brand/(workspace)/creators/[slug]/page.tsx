@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 
 import { CreatorPublicCard } from "@/components/marketplace/creator-card";
 import { SaveCreatorButton } from "@/components/marketplace/save-button";
+import { InviteToCampaignForm } from "@/components/campaigns/InviteToCampaignForm";
 import { EmptyState, PageHeader } from "@/components/workspace/ui";
 import { requireRole } from "@/lib/auth/session";
+import type { CampaignStatus } from "@/lib/supabase/database.types";
 import {
   getPublishedCreatorBySlug,
   getSavedCreatorIds,
@@ -42,6 +44,20 @@ export default async function BrandCreatorDetailPage({
     .eq("profile_id", userId)
     .maybeSingle();
 
+  const { data: eligibleCampaigns } = brand
+    ? await supabase
+        .from("campaigns")
+        .select("id,campaign_name,status")
+        .eq("brand_id", brand.id)
+        .in("status", ["draft", "active"])
+    : {
+        data: [] as Array<{
+          id: string;
+          campaign_name: string;
+          status: CampaignStatus;
+        }>,
+      };
+
   const savedIds = brand
     ? (await getSavedCreatorIds(brand.id)).ids
     : new Set<string>();
@@ -69,6 +85,10 @@ export default async function BrandCreatorDetailPage({
           <SaveCreatorButton
             creatorId={creator.id}
             initiallySaved={savedIds.has(creator.id)}
+          />
+          <InviteToCampaignForm
+            creatorId={creator.id}
+            campaigns={eligibleCampaigns ?? []}
           />
           {creator.linkedin_url ? (
             <a

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { CreatorPublicCard } from "@/components/marketplace/creator-card";
 import { SaveCreatorButton } from "@/components/marketplace/save-button";
+import { InviteToCampaignForm } from "@/components/campaigns/InviteToCampaignForm";
 import { EmptyState, PageHeader } from "@/components/workspace/ui";
 import { requireRole } from "@/lib/auth/session";
 import { listSavedCreators } from "@/lib/marketplace/queries";
@@ -26,6 +27,11 @@ export default async function BrandShortlistPage() {
   }
 
   const { creators, error } = await listSavedCreators(brand.id);
+  const { data: eligibleCampaigns } = await supabase
+    .from("campaigns")
+    .select("id,campaign_name,status")
+    .eq("brand_id", brand.id)
+    .in("status", ["draft", "active"]);
 
   return (
     <div className="space-y-6">
@@ -67,10 +73,13 @@ export default async function BrandShortlistPage() {
                 creator={creator}
                 href={`/brand/creators/${creator.slug}`}
                 actions={
-                  <SaveCreatorButton
-                    creatorId={creator.id}
-                    initiallySaved
-                  />
+                  <div className="space-y-3">
+                    <SaveCreatorButton creatorId={creator.id} initiallySaved />
+                    <InviteToCampaignForm
+                      creatorId={creator.id}
+                      campaigns={eligibleCampaigns ?? []}
+                    />
+                  </div>
                 }
               />
             </li>

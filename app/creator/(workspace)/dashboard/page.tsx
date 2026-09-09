@@ -55,11 +55,33 @@ export default async function CreatorDashboardPage() {
     },
   ];
 
+  let opportunityCounts = {
+    pending: 0,
+    accepted: 0,
+    declined: 0,
+  };
+
+  if (creator?.id) {
+    const { data: invites } = await supabase
+      .from("campaign_creators")
+      .select("status")
+      .eq("creator_id", creator.id)
+      .in("status", ["booking_pending", "accepted", "declined"]);
+
+    opportunityCounts = {
+      pending: (invites ?? []).filter((i) => i.status === "booking_pending")
+        .length,
+      accepted: (invites ?? []).filter((i) => i.status === "accepted").length,
+      declined: (invites ?? []).filter((i) => i.status === "declined").length,
+    };
+  }
+
   return (
     <CreatorOverview
       profile={profile}
       creator={creator}
       checklist={checklist}
+      opportunityCounts={opportunityCounts}
       sharePath={
         creator?.publication_status === "published" && creator.slug
           ? `/brand/creators/${creator.slug}`

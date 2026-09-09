@@ -1,6 +1,12 @@
 export type UserRole = "brand" | "creator";
 export type PublicationStatus = "draft" | "published";
 export type AvailabilityStatus = "available" | "unavailable";
+export type CampaignStatus = "draft" | "active" | "completed" | "archived";
+export type CampaignCreatorStatus =
+  | "booking_pending"
+  | "accepted"
+  | "declined"
+  | "cancelled";
 
 export type Profile = {
   id: string;
@@ -50,6 +56,42 @@ export type SavedCreator = {
   brand_id: string;
   creator_id: string;
   created_at: string;
+};
+
+export type Campaign = {
+  id: string;
+  brand_id: string;
+  campaign_name: string;
+  product_or_company: string;
+  objective: string;
+  description: string;
+  key_messages: string[];
+  creator_guidelines: string;
+  deliverable_type: string;
+  post_count: number;
+  target_publish_date: string;
+  currency: string;
+  budget_cents: number;
+  status: CampaignStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CampaignCreator = {
+  id: string;
+  campaign_id: string;
+  creator_id: string;
+  status: CampaignCreatorStatus;
+  price_cents: number;
+  currency: string;
+  post_count_snapshot: number;
+  decline_reason: string | null;
+  invited_at: string;
+  accepted_at: string | null;
+  declined_at: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type MarketplaceCreator = Pick<
@@ -149,6 +191,62 @@ export type Database = {
         Update: Partial<Omit<SavedCreator, "id" | "created_at">>;
         Relationships: [];
       };
+      campaigns: {
+        Row: Campaign;
+        Insert: {
+          id?: string;
+          brand_id: string;
+          campaign_name: string;
+          product_or_company: string;
+          objective: string;
+          description: string;
+          key_messages?: string[];
+          creator_guidelines: string;
+          deliverable_type: string;
+          post_count: number;
+          target_publish_date: string;
+          currency?: string;
+          budget_cents: number;
+          status?: CampaignStatus;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Omit<Campaign, "id" | "created_at" | "brand_id"> & {
+            brand_id?: string;
+            updated_at?: string;
+          }
+        >;
+        Relationships: [];
+      };
+      campaign_creators: {
+        Row: CampaignCreator;
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          creator_id: string;
+          status?: CampaignCreatorStatus;
+          price_cents: number;
+          currency?: string;
+          post_count_snapshot: number;
+          decline_reason?: string | null;
+          invited_at?: string;
+          accepted_at?: string | null;
+          declined_at?: string | null;
+          cancelled_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Omit<
+            CampaignCreator,
+            "id" | "created_at" | "campaign_id" | "creator_id" | "invited_at" | "price_cents" | "post_count_snapshot" | "currency"
+          > & {
+            updated_at?: string;
+          }
+        >;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -161,6 +259,8 @@ export type Database = {
       user_role: UserRole;
       publication_status: PublicationStatus;
       availability_status: AvailabilityStatus;
+      campaign_status: CampaignStatus;
+      campaign_creator_status: CampaignCreatorStatus;
     };
     CompositeTypes: Record<string, never>;
   };

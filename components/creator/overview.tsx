@@ -106,11 +106,17 @@ export function CreatorOverview({
   creator,
   checklist,
   sharePath = "/creator/card",
+  opportunityCounts,
 }: {
   profile: Profile;
   creator: Creator | null;
   checklist: ChecklistItem[];
   sharePath?: string;
+  opportunityCounts?: {
+    pending: number;
+    accepted: number;
+    declined: number;
+  };
 }) {
   const firstName = profile.full_name.split(/\s+/)[0] || profile.full_name;
   const completed = checklist.filter((item) => item.done).length;
@@ -254,7 +260,9 @@ export function CreatorOverview({
           <div>
             <h2 className="text-base font-semibold text-ink">Opportunities</h2>
             <p className="mt-1 text-sm text-support">
-              Booking requests from brands will appear here.
+              {opportunityCounts
+                ? `${opportunityCounts.pending} pending · ${opportunityCounts.accepted} accepted · ${opportunityCounts.declined} declined`
+                : "Booking requests from brands will appear here."}
             </p>
           </div>
           <SecondaryLink href="/creator/opportunities" className="!w-auto">
@@ -262,10 +270,17 @@ export function CreatorOverview({
           </SecondaryLink>
         </div>
         <div className="mt-5 rounded-xl border border-dashed border-line-strong bg-[#f7f8fa] px-4 py-8 text-center">
-          <p className="text-sm font-medium text-ink">No opportunities yet</p>
+          <p className="text-sm font-medium text-ink">
+            {(opportunityCounts?.pending ?? 0) +
+              (opportunityCounts?.accepted ?? 0) +
+              (opportunityCounts?.declined ?? 0) ===
+            0
+              ? "No opportunities yet"
+              : "You have campaign invitations"}
+          </p>
           <p className="mx-auto mt-1 max-w-md text-sm text-support">
-            Keep your creator card discoverable. Brands can book you once
-            campaigns start rolling.
+            Keep your creator card discoverable. Brands invite published
+            creators from active campaigns.
           </p>
         </div>
       </section>
