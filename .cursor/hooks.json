@@ -3,12 +3,12 @@
   "hooks": {
     "beforeSubmitPrompt": [
       {
-        "command": ".cursor/hooks/agent-capture.cmd"
+        "command": "node .cursor/hooks/capture.mjs"
       }
     ],
     "afterAgentResponse": [
       {
-        "command": ".cursor/hooks/agent-capture.cmd"
+        "command": "node .cursor/hooks/capture.mjs"
       }
     ]
   }

@@ -1,0 +1,20 @@
+{
+  "7336f061-6baa-40d4-a253-633e9d82da2a": {
+    "conversation_id": "7336f061-6baa-40d4-a253-633e9d82da2a",
+    "session_short": "7336f061",
+    "filename": "2026-09-09_14-48-42_7336f061-6baa-40d4-a253-633e9d82da2a.md",
+    "first_prompt_time": "2026-09-09T14:48:42.236Z",
+    "last_prompt_time": "2026-09-09T14:50:29.178Z",
+    "total_exchanges": 1,
+    "model": "default"
+  },
+  "d7317f9f-4171-4def-bd5b-64c79f44304e": {
+    "conversation_id": "d7317f9f-4171-4def-bd5b-64c79f44304e",
+    "session_short": "d7317f9f",
+    "filename": "2026-09-09_14-50-44_d7317f9f-4171-4def-bd5b-64c79f44304e.md",
+    "first_prompt_time": "2026-09-09T14:50:44.004Z",
+    "last_prompt_time": "2026-09-09T14:51:02.320Z",
+    "total_exchanges": 1,
+    "model": "default"
+  }
+}
