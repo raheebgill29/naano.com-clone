@@ -1,5 +1,6 @@
 import { CreatorOverview } from "@/components/creator/overview";
 import { ACTIVE_COLLAB_STATUSES } from "@/lib/collaborations/queries";
+import { countUnreadMessages } from "@/lib/messages/queries";
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -68,6 +69,8 @@ export default async function CreatorDashboardPage() {
     cancelled: 0,
   };
 
+  let unreadMessages = 0;
+
   if (creator?.id) {
     const { data: rows } = await supabase
       .from("campaign_creators")
@@ -90,6 +93,9 @@ export default async function CreatorDashboardPage() {
     };
   }
 
+  const unread = await countUnreadMessages("creator");
+  unreadMessages = unread.count;
+
   return (
     <CreatorOverview
       profile={profile}
@@ -97,6 +103,7 @@ export default async function CreatorDashboardPage() {
       checklist={checklist}
       opportunityCounts={opportunityCounts}
       collabCounts={collabCounts}
+      unreadMessages={unreadMessages}
       sharePath={
         creator?.publication_status === "published" && creator.slug
           ? `/brand/creators/${creator.slug}`

@@ -23,6 +23,10 @@ function revalidateCollab(id: string) {
   revalidatePath("/creator/dashboard");
   revalidatePath("/brand/dashboard");
   revalidatePath("/creator/opportunities");
+  revalidatePath("/creator/messages");
+  revalidatePath(`/creator/messages/${id}`);
+  revalidatePath("/brand/messages");
+  revalidatePath(`/brand/messages/${id}`);
 }
 
 export async function submitDraftAction(

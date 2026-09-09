@@ -1,5 +1,6 @@
 import { BrandOverview } from "@/components/brand/overview";
 import { ACTIVE_COLLAB_STATUSES } from "@/lib/collaborations/queries";
+import { countUnreadMessages } from "@/lib/messages/queries";
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -18,6 +19,7 @@ export default async function BrandDashboardPage() {
     draftsAwaitingReview: 0,
     completedCollaborations: 0,
     pendingInvites: 0,
+    unreadMessages: 0,
   };
 
   if (brand) {
@@ -51,6 +53,9 @@ export default async function BrandDashboardPage() {
       ).length;
     }
   }
+
+  const { count: unreadMessages } = await countUnreadMessages("brand");
+  metrics.unreadMessages = unreadMessages;
 
   return <BrandOverview profile={profile} brand={brand} metrics={metrics} />;
 }

@@ -5,18 +5,23 @@ import { useEffect, useId, useState, type ReactNode } from "react";
 import { WorkspaceSidebar } from "@/components/workspace/sidebar";
 import { WorkspaceTopbar } from "@/components/workspace/topbar";
 import type { NavItem } from "@/components/workspace/nav";
+import type { Notification } from "@/lib/supabase/database.types";
 
 export function WorkspaceShell({
   roleLabel,
   fullName,
   homeHref,
   items,
+  notifications = [],
+  unreadNotifications = 0,
   children,
 }: {
   roleLabel: string;
   fullName: string;
   homeHref: string;
   items: NavItem[];
+  notifications?: Notification[];
+  unreadNotifications?: number;
   children: ReactNode;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -74,6 +79,8 @@ export function WorkspaceShell({
             fullName={fullName}
             roleLabel={roleLabel}
             onOpenMenu={() => setDrawerOpen(true)}
+            notifications={notifications}
+            unreadNotifications={unreadNotifications}
           />
           <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mx-auto w-full max-w-6xl">{children}</div>

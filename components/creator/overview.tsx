@@ -108,6 +108,7 @@ export function CreatorOverview({
   sharePath = "/creator/card",
   opportunityCounts,
   collabCounts,
+  unreadMessages = 0,
 }: {
   profile: Profile;
   creator: Creator | null;
@@ -123,6 +124,7 @@ export function CreatorOverview({
     completed: number;
     cancelled: number;
   };
+  unreadMessages?: number;
 }) {
   const firstName = profile.full_name.split(/\s+/)[0] || profile.full_name;
   const completed = checklist.filter((item) => item.done).length;
@@ -159,19 +161,16 @@ export function CreatorOverview({
           href="/creator/collaborations"
         />
         <Metric
+          label="Unread messages"
+          value={String(unreadMessages)}
+          hint="Collaboration conversations"
+          href="/creator/messages"
+        />
+        <Metric
           label="Completed collaborations"
           value={String(collabCounts?.completed ?? 0)}
           hint="Finished booked work"
           href="/creator/collaborations?filter=completed"
-        />
-        <Metric
-          label="LinkedIn followers"
-          value={formatCount(creator?.audience_size)}
-          hint={
-            creator?.audience_size != null
-              ? "From your creator profile"
-              : "Add audience size on your card"
-          }
         />
       </section>
 

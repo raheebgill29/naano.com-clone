@@ -134,6 +134,29 @@ export type CollaborationEvent = {
   created_at: string;
 };
 
+export type CollaborationMessage = {
+  id: string;
+  campaign_creator_id: string;
+  sender_profile_id: string;
+  body: string;
+  client_message_id: string | null;
+  created_at: string;
+};
+
+export type Notification = {
+  id: string;
+  recipient_profile_id: string;
+  actor_profile_id: string | null;
+  type: string;
+  title: string;
+  body: string | null;
+  href: string;
+  campaign_creator_id: string | null;
+  dedupe_key: string;
+  read_at: string | null;
+  created_at: string;
+};
+
 export type MarketplaceCreator = Pick<
   Creator,
   | "id"
@@ -334,6 +357,55 @@ export type Database = {
         Update: Partial<CollaborationEvent>;
         Relationships: [];
       };
+      collaboration_messages: {
+        Row: CollaborationMessage;
+        Insert: {
+          id?: string;
+          campaign_creator_id: string;
+          sender_profile_id: string;
+          body: string;
+          client_message_id?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<CollaborationMessage>;
+        Relationships: [];
+      };
+      collaboration_thread_reads: {
+        Row: {
+          campaign_creator_id: string;
+          profile_id: string;
+          last_read_at: string;
+        };
+        Insert: {
+          campaign_creator_id: string;
+          profile_id: string;
+          last_read_at?: string;
+        };
+        Update: {
+          last_read_at?: string;
+        };
+        Relationships: [];
+      };
+      notifications: {
+        Row: Notification;
+        Insert: {
+          id?: string;
+          recipient_profile_id: string;
+          actor_profile_id?: string | null;
+          type: string;
+          title: string;
+          body?: string | null;
+          href: string;
+          campaign_creator_id?: string | null;
+          dedupe_key: string;
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<
+          Pick<Notification, "read_at" | "title" | "body" | "href">
+        >;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -392,6 +464,26 @@ export type Database = {
           p_reason: string;
         };
         Returns: CampaignCreator;
+      };
+      collab_send_message: {
+        Args: {
+          p_campaign_creator_id: string;
+          p_body: string;
+          p_client_message_id?: string | null;
+        };
+        Returns: CollaborationMessage;
+      };
+      collab_mark_thread_read: {
+        Args: { p_campaign_creator_id: string };
+        Returns: undefined;
+      };
+      mark_notification_read: {
+        Args: { p_notification_id: string };
+        Returns: undefined;
+      };
+      mark_all_notifications_read: {
+        Args: Record<string, never>;
+        Returns: undefined;
       };
     };
     Enums: {

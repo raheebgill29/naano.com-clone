@@ -3,16 +3,22 @@
 import { useEffect, useId, useRef, useState } from "react";
 
 import { signOutAction } from "@/lib/auth/actions";
+import { NotificationsBell } from "@/components/notifications/bell";
 import { initials } from "@/components/workspace/ui";
+import type { Notification } from "@/lib/supabase/database.types";
 
 export function WorkspaceTopbar({
   fullName,
   roleLabel,
   onOpenMenu,
+  notifications,
+  unreadNotifications,
 }: {
   fullName: string;
   roleLabel: string;
   onOpenMenu: () => void;
+  notifications: Notification[];
+  unreadNotifications: number;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
@@ -74,17 +80,11 @@ export function WorkspaceTopbar({
           <option value="en">EN</option>
         </select>
 
-        <button
-          type="button"
-          className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line text-support"
-          aria-label="Notifications"
-          title="No notifications yet"
-        >
-          <span
-            className="block h-4 w-4 rounded-full border-2 border-current"
-            aria-hidden
-          />
-        </button>
+        <NotificationsBell
+          key={`${unreadNotifications}-${notifications.map((n) => `${n.id}:${n.read_at ?? ""}`).join("|")}`}
+          initialItems={notifications}
+          initialUnread={unreadNotifications}
+        />
 
         <div className="relative" ref={menuRef}>
           <button

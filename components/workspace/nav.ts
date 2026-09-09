@@ -15,7 +15,7 @@ export const creatorNav: NavItem[] = [
   { label: "Community", soon: true },
   { label: "Earnings", soon: true },
   { label: "Affiliate program", soon: true },
-  { label: "Messages", soon: true },
+  { label: "Messages", href: "/creator/messages" },
 ];
 
 export const brandNav: NavItem[] = [
@@ -25,7 +25,7 @@ export const brandNav: NavItem[] = [
   { label: "Campaigns", href: "/brand/campaigns" },
   { label: "Collaborations", href: "/brand/collaborations" },
   { label: "Analytics", soon: true },
-  { label: "Messages", soon: true },
+  { label: "Messages", href: "/brand/messages" },
 ];
 
 export function navForRole(role: UserRole): NavItem[] {

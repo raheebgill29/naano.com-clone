@@ -68,12 +68,20 @@ export default async function BrandCollaborationDetailPage({
         title={creator?.full_name ?? "Creator"}
         description={`${campaign.campaign_name} · ${STATUS_LABEL[collab.status]}`}
         actions={
-          <Link
-            href="/brand/collaborations"
-            className="text-sm font-semibold text-accent hover:text-accent-hover"
-          >
-            ← Back
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/brand/messages/${collab.id}`}
+              className="rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm font-semibold text-ink hover:bg-[#f7f8fa]"
+            >
+              Open conversation
+            </Link>
+            <Link
+              href="/brand/collaborations"
+              className="text-sm font-semibold text-accent hover:text-accent-hover"
+            >
+              ← Back
+            </Link>
+          </div>
         }
       />
 

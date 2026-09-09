@@ -17,6 +17,7 @@ export function BrandOverview({
     draftsAwaitingReview: number;
     completedCollaborations: number;
     pendingInvites: number;
+    unreadMessages?: number;
   };
 }) {
   const company = brand?.company_name || "your brand";
@@ -25,6 +26,7 @@ export function BrandOverview({
   const draftsAwaitingReview = metrics?.draftsAwaitingReview ?? 0;
   const completedCollaborations = metrics?.completedCollaborations ?? 0;
   const pendingInvites = metrics?.pendingInvites ?? 0;
+  const unreadMessages = metrics?.unreadMessages ?? 0;
 
   return (
     <div className="space-y-8">
@@ -73,6 +75,14 @@ export function BrandOverview({
           className="font-semibold text-accent hover:text-accent-hover"
         >
           {pendingInvites}
+        </Link>
+        {" · "}
+        Unread messages:{" "}
+        <Link
+          href="/brand/messages"
+          className="font-semibold text-accent hover:text-accent-hover"
+        >
+          {unreadMessages}
         </Link>
       </p>
 
