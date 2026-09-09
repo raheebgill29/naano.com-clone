@@ -146,6 +146,16 @@ export type CollaborationEvent = {
   created_at: string;
 };
 
+export type CampaignEvent = {
+  id: string;
+  campaign_id: string;
+  event_type: string;
+  actor_profile_id: string | null;
+  message: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
 export type CollaborationMessage = {
   id: string;
   campaign_creator_id: string;
@@ -367,6 +377,20 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<CollaborationEvent>;
+        Relationships: [];
+      };
+      campaign_events: {
+        Row: CampaignEvent;
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          event_type: string;
+          actor_profile_id?: string | null;
+          message?: string | null;
+          metadata?: Record<string, unknown>;
+          created_at?: string;
+        };
+        Update: Partial<CampaignEvent>;
         Relationships: [];
       };
       collaboration_messages: {
