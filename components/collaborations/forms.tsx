@@ -97,17 +97,32 @@ export function RequestRevisionForm({
 
 export function ApproveDraftForm({
   campaignCreatorId,
+  contentSubmissionId,
+  disabled,
 }: {
   campaignCreatorId: string;
+  contentSubmissionId?: string;
+  disabled?: boolean;
 }) {
+  const [state, action, pending] = useActionState(approveDraftAction, initial);
+  const blocked = Boolean(disabled || pending);
   return (
-    <form action={approveDraftAction}>
+    <form action={action} className="space-y-3">
       <input type="hidden" name="campaign_creator_id" value={campaignCreatorId} />
+      {contentSubmissionId ? (
+        <input
+          type="hidden"
+          name="content_submission_id"
+          value={contentSubmissionId}
+        />
+      ) : null}
+      <FormMessage error={state.error} />
       <button
         type="submit"
-        className="inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
+        disabled={blocked}
+        className="inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover disabled:opacity-60"
       >
-        Approve latest draft
+        {pending ? "Approving…" : "Approve latest draft"}
       </button>
     </form>
   );

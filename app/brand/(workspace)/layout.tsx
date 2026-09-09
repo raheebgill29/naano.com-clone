@@ -10,7 +10,7 @@ export default async function BrandWorkspaceLayout({
 }: {
   children: ReactNode;
 }) {
-  const { profile } = await requireRole("brand");
+  const { profile, userId } = await requireRole("brand");
   const { items, unreadCount } = await listNotifications(25);
 
   return (
@@ -21,6 +21,7 @@ export default async function BrandWorkspaceLayout({
       items={navForRole("brand")}
       notifications={items}
       unreadNotifications={unreadCount}
+      recipientProfileId={userId}
     >
       {children}
     </WorkspaceShell>

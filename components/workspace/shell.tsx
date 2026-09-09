@@ -14,6 +14,7 @@ export function WorkspaceShell({
   items,
   notifications = [],
   unreadNotifications = 0,
+  recipientProfileId,
   children,
 }: {
   roleLabel: string;
@@ -22,6 +23,7 @@ export function WorkspaceShell({
   items: NavItem[];
   notifications?: Notification[];
   unreadNotifications?: number;
+  recipientProfileId: string;
   children: ReactNode;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -81,6 +83,7 @@ export function WorkspaceShell({
             onOpenMenu={() => setDrawerOpen(true)}
             notifications={notifications}
             unreadNotifications={unreadNotifications}
+            recipientProfileId={recipientProfileId}
           />
           <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mx-auto w-full max-w-6xl">{children}</div>

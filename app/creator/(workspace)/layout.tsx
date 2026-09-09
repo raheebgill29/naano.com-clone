@@ -10,7 +10,7 @@ export default async function CreatorWorkspaceLayout({
 }: {
   children: ReactNode;
 }) {
-  const { profile } = await requireRole("creator");
+  const { profile, userId } = await requireRole("creator");
   const { items, unreadCount } = await listNotifications(25);
 
   return (
@@ -21,6 +21,7 @@ export default async function CreatorWorkspaceLayout({
       items={navForRole("creator")}
       notifications={items}
       unreadNotifications={unreadCount}
+      recipientProfileId={userId}
     >
       {children}
     </WorkspaceShell>

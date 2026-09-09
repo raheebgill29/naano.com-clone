@@ -13,12 +13,14 @@ export function WorkspaceTopbar({
   onOpenMenu,
   notifications,
   unreadNotifications,
+  recipientProfileId,
 }: {
   fullName: string;
   roleLabel: string;
   onOpenMenu: () => void;
   notifications: Notification[];
   unreadNotifications: number;
+  recipientProfileId: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
@@ -81,9 +83,10 @@ export function WorkspaceTopbar({
         </select>
 
         <NotificationsBell
-          key={`${unreadNotifications}-${notifications.map((n) => `${n.id}:${n.read_at ?? ""}`).join("|")}`}
+          key={`${recipientProfileId}:${unreadNotifications}:${notifications.map((n) => `${n.id}:${n.read_at ?? ""}`).join("|")}`}
           initialItems={notifications}
           initialUnread={unreadNotifications}
+          recipientProfileId={recipientProfileId}
         />
 
         <div className="relative" ref={menuRef}>

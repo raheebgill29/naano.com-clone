@@ -27,7 +27,7 @@ export async function listCreatorCollaborations({
   let query = supabase
     .from("campaign_creators")
     .select(
-      "id,status,campaign_id,price_cents,currency,post_count_snapshot,accepted_at,updated_at,scheduled_publish_at,published_url",
+      "id,status,campaign_id,price_cents,currency,post_count_snapshot,accepted_at,updated_at,scheduled_publish_at,published_url,approved_at",
     )
     .eq("creator_id", creatorId)
     .not("status", "in", "(booking_pending,declined)")

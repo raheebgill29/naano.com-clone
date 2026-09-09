@@ -5,6 +5,7 @@ import {
   PublishUrlForm,
   SubmitDraftForm,
 } from "@/components/collaborations/forms";
+import { CollaborationLiveRefresh } from "@/lib/collaborations/use-collaboration-live";
 import {
   EmptyState,
   PageHeader,
@@ -39,9 +40,16 @@ export default async function CreatorCollaborationDetailPage({
   const draftVersions = drafts.filter((d) => d.submission_type === "draft");
   const readOnly =
     collab.status === "completed" || collab.status === "cancelled";
+  const isApprovedOrBeyond = [
+    "approved",
+    "scheduled",
+    "published",
+    "completed",
+  ].includes(collab.status);
 
   return (
     <div className="space-y-6">
+      <CollaborationLiveRefresh collaborationId={collab.id} />
       <PageHeader
         eyebrow="Collaboration"
         title={campaign.campaign_name}
@@ -67,6 +75,44 @@ export default async function CreatorCollaborationDetailPage({
       <p className="rounded-lg border border-accent/20 bg-accent-soft px-4 py-3 text-sm font-medium text-accent">
         Next: {nextActionForStatus(collab.status, "creator")}
       </p>
+
+      {isApprovedOrBeyond ? (
+        <section className="rounded-xl border border-emerald-200 bg-[#ecfdf5] p-5">
+          <h2 className="text-base font-semibold text-ink">Draft approved</h2>
+          <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-ink-subtle">Status</dt>
+              <dd className="mt-0.5 font-medium text-ink">
+                {STATUS_LABEL[collab.status]}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-ink-subtle">Approved at</dt>
+              <dd className="mt-0.5 font-medium text-ink">
+                {collab.approved_at
+                  ? new Date(collab.approved_at).toLocaleString()
+                  : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-ink-subtle">Scheduling</dt>
+              <dd className="mt-0.5 font-medium text-ink">
+                {collab.status === "approved"
+                  ? "Waiting for brand to set a publish date"
+                  : collab.scheduled_publish_at
+                    ? `Scheduled for ${new Date(collab.scheduled_publish_at).toLocaleDateString()}`
+                    : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-ink-subtle">Next step</dt>
+              <dd className="mt-0.5 font-medium text-ink">
+                {nextActionForStatus(collab.status, "creator")}
+              </dd>
+            </div>
+          </dl>
+        </section>
+      ) : null}
 
       <section className="grid gap-4 sm:grid-cols-3">
         <article className="rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow)]">
@@ -190,6 +236,13 @@ export default async function CreatorCollaborationDetailPage({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-ink">
                     Version {draft.version}
+                    {draft.review_status === "approved"
+                      ? " · approved"
+                      : draft.review_status === "revision_requested"
+                        ? " · revisions requested"
+                        : draft.review_status === "pending"
+                          ? " · pending review"
+                          : ""}
                   </p>
                   <p className="text-xs text-support">
                     {new Date(draft.created_at).toLocaleString()}
@@ -198,6 +251,11 @@ export default async function CreatorCollaborationDetailPage({
                 <p className="mt-2 whitespace-pre-wrap text-sm text-ink">
                   {draft.body}
                 </p>
+                {draft.reviewed_at ? (
+                  <p className="mt-2 text-xs text-support">
+                    Reviewed {new Date(draft.reviewed_at).toLocaleString()}
+                  </p>
+                ) : null}
                 {draft.asset_url ? (
                   <a
                     href={draft.asset_url}

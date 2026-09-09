@@ -162,6 +162,13 @@ export default async function BrandCollaborationDetailPage({
                   <p className="text-sm font-semibold text-ink">
                     Version {draft.version}
                     {index === 0 ? " · latest" : ""}
+                    {draft.review_status === "approved"
+                      ? " · approved"
+                      : draft.review_status === "revision_requested"
+                        ? " · revisions requested"
+                        : draft.review_status === "pending"
+                          ? " · pending review"
+                          : ""}
                   </p>
                   <p className="text-xs text-support">
                     {new Date(draft.created_at).toLocaleString()}
@@ -197,7 +204,11 @@ export default async function BrandCollaborationDetailPage({
               Approve the latest pending draft to move toward scheduling.
             </p>
             <div className="mt-4">
-              <ApproveDraftForm campaignCreatorId={collab.id} />
+              <ApproveDraftForm
+                campaignCreatorId={collab.id}
+                contentSubmissionId={draftVersions[0]?.id}
+                disabled={collab.status !== "draft_submitted"}
+              />
             </div>
           </div>
           <div className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)]">
@@ -212,6 +223,13 @@ export default async function BrandCollaborationDetailPage({
       {!readOnly && collab.status === "approved" ? (
         <section className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
           <h2 className="text-base font-semibold text-ink">Schedule publication</h2>
+          <p className="mt-1 text-sm text-support">
+            Approved
+            {collab.approved_at
+              ? ` ${new Date(collab.approved_at).toLocaleString()}`
+              : ""}
+            . Set the publish date next.
+          </p>
           <div className="mt-4 max-w-md">
             <ScheduleForm
               campaignCreatorId={collab.id}

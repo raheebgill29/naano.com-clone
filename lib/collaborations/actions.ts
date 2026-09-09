@@ -16,6 +16,8 @@ function trimString(value: FormDataEntryValue | null) {
 }
 
 function revalidateCollab(id: string) {
+  revalidatePath("/creator", "layout");
+  revalidatePath("/brand", "layout");
   revalidatePath("/creator/collaborations");
   revalidatePath(`/creator/collaborations/${id}`);
   revalidatePath("/brand/collaborations");
@@ -76,18 +78,22 @@ export async function requestRevisionAction(
   redirect(`/brand/collaborations/${id}`);
 }
 
-export async function approveDraftAction(formData: FormData): Promise<void> {
+export async function approveDraftAction(
+  _prev: CollabActionState,
+  formData: FormData,
+): Promise<CollabActionState> {
   await requireRole("brand");
   const id = trimString(formData.get("campaign_creator_id"));
-  if (!id) redirect("/brand/collaborations");
+  const draftId = trimString(formData.get("content_submission_id"));
+  if (!id) return { error: "Missing collaboration id." };
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("collab_approve_draft", {
     p_campaign_creator_id: id,
+    ...(draftId ? { p_content_submission_id: draftId } : {}),
   });
-  if (error) {
-    redirect(`/brand/collaborations/${id}?error=${encodeURIComponent(error.message)}`);
-  }
+  if (error) return { error: error.message };
+
   revalidateCollab(id);
   redirect(`/brand/collaborations/${id}`);
 }

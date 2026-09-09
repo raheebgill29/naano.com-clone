@@ -121,6 +121,9 @@ export type ContentSubmission = {
   published_url: string | null;
   notes: string | null;
   submitted_by: string;
+  review_status: "pending" | "approved" | "revision_requested" | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
   created_at: string;
 };
 
@@ -437,7 +440,10 @@ export type Database = {
         Returns: CampaignCreator;
       };
       collab_approve_draft: {
-        Args: { p_campaign_creator_id: string };
+        Args: {
+          p_campaign_creator_id: string;
+          p_content_submission_id?: string | null;
+        };
         Returns: CampaignCreator;
       };
       collab_schedule: {
