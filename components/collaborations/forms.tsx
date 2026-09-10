@@ -200,12 +200,9 @@ export function CompleteCollabForm({
   return (
     <form action={completeCollabAction}>
       <input type="hidden" name="campaign_creator_id" value={campaignCreatorId} />
-      <button
-        type="submit"
-        className="inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
-      >
+      <ConfirmButton confirmText="Mark this collaboration complete? This confirms the published post.">
         Mark collaboration complete
-      </button>
+      </ConfirmButton>
     </form>
   );
 }
