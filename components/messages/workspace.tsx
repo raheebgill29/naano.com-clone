@@ -31,9 +31,9 @@ export function MessagingWorkspace({
   const showConversation = Boolean(activeId && conversation);
 
   return (
-    <div className="-mx-4 -my-6 flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col sm:-mx-6 sm:-my-7 lg:-mx-8">
-      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
-        <div className="flex min-h-0 flex-1 overflow-hidden rounded-[14px] border border-line bg-surface shadow-[var(--shadow-sm)]">
+    <div className="-mx-4 -my-5 flex h-[calc(100dvh-3rem)] min-h-0 flex-col sm:-mx-6 sm:-my-6 lg:-mx-8">
+      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+        <div className="flex min-h-0 flex-1 overflow-hidden rounded-[12px] border border-line bg-surface">
           <aside
             className={`min-h-0 w-full shrink-0 border-r border-line md:w-[340px] ${
               showConversation ? "hidden md:flex md:flex-col" : "flex flex-col"
@@ -77,15 +77,9 @@ export function MessagingWorkspace({
 function EmptyConversationPane() {
   return (
     <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent">
-        M
-      </div>
-      <h2 className="mt-4 text-base font-semibold text-ink">
-        Select a conversation
-      </h2>
+      <h2 className="text-[15px] font-semibold text-ink">Select a conversation</h2>
       <p className="mt-1 max-w-sm text-sm text-support">
-        Choose a collaboration thread from the list to review messages and
-        coordinate next steps.
+        Open a thread to review messages for an active collaboration.
       </p>
     </div>
   );

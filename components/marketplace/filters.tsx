@@ -306,7 +306,7 @@ function MarketplaceFiltersInner({
 
   return (
     <div className="space-y-3">
-      <div className="rounded-[14px] border border-line bg-surface p-3 shadow-[var(--shadow-sm)] sm:p-4">
+      <div className="rounded-[12px] border border-line bg-surface p-2.5 sm:p-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <form
             onSubmit={onSearchSubmit}

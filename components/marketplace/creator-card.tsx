@@ -44,8 +44,8 @@ export function CreatorPublicCard({
 
   const content = (
     <>
-      <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent-soft text-sm font-semibold text-accent">
+      <div className="flex items-start gap-3.5">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-page text-sm font-semibold text-ink-muted">
           {creator.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -54,7 +54,9 @@ export function CreatorPublicCard({
               className="h-full w-full object-cover"
             />
           ) : (
-            initials(name) || "C"
+            <span className="flex h-full w-full items-center justify-center bg-accent-soft text-accent">
+              {initials(name) || "C"}
+            </span>
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -140,7 +142,7 @@ export function CreatorPublicCard({
   );
 
   return (
-    <article className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 hover:border-line-strong hover:shadow-[var(--shadow)]">
+    <article className="rounded-[12px] border border-line bg-surface p-4 transition-[border-color,box-shadow] duration-150 hover:border-line-strong">
       {href ? (
         <Link href={href} className="block">
           {content}

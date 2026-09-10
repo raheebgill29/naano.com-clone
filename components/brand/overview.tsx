@@ -172,69 +172,69 @@ export function BrandOverview({ data }: { data: BrandDashboardData }) {
   const company = data.brand?.company_name || "your brand";
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <PageHeader
-        eyebrow="Brand workspace"
         title={`Welcome back, ${firstName}`}
-        description={`Track campaigns and collaborations for ${company}.`}
+        description={`${company} campaign workspace`}
         actions={
           <>
             <PrimaryLink href="/brand/discover" className="!w-auto">
-              Explore creators
+              Browse creators
             </PrimaryLink>
             <SecondaryLink href="/brand/campaigns/new" className="!w-auto">
-              Create campaign
+              New campaign
             </SecondaryLink>
           </>
         }
       />
 
-      <section
-        aria-label="Workspace metrics"
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"
-      >
-        <MetricCard
-          label="Active campaigns"
-          value={metrics.activeCampaigns}
-          href="/brand/campaigns?status=active"
-          icon={<MetricIcon kind="campaigns" />}
-          tone="accent"
-        />
-        <MetricCard
-          label="Active collaborations"
-          value={metrics.activeCollaborations}
-          href="/brand/collaborations"
-          icon={<MetricIcon kind="collabs" />}
-          tone="accent"
-        />
-        <MetricCard
-          label="Drafts awaiting review"
-          value={metrics.draftsAwaitingReview}
-          href="/brand/collaborations?filter=needs_review"
-          icon={<MetricIcon kind="drafts" />}
-          tone="warning"
-        />
-        <MetricCard
-          label="Completed collaborations"
-          value={metrics.completedCollaborations}
-          href="/brand/collaborations?filter=completed"
-          icon={<MetricIcon kind="done" />}
-          tone="success"
-        />
-      </section>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-8">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <div className="space-y-5 lg:col-span-8">
           <AttentionSection items={attention} />
+
+          <section
+            aria-label="Workspace metrics"
+            className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+          >
+            <MetricCard
+              label="Campaigns"
+              value={metrics.activeCampaigns}
+              href="/brand/campaigns?status=active"
+              icon={<MetricIcon kind="campaigns" />}
+              tone="accent"
+            />
+            <MetricCard
+              label="Collaborations"
+              value={metrics.activeCollaborations}
+              href="/brand/collaborations"
+              icon={<MetricIcon kind="collabs" />}
+              tone="accent"
+            />
+            <MetricCard
+              label="Awaiting review"
+              value={metrics.draftsAwaitingReview}
+              href="/brand/collaborations?filter=needs_review"
+              icon={<MetricIcon kind="drafts" />}
+              tone="warning"
+            />
+            <MetricCard
+              label="Completed"
+              value={metrics.completedCollaborations}
+              href="/brand/collaborations?filter=completed"
+              icon={<MetricIcon kind="done" />}
+              tone="success"
+            />
+          </section>
+
           <ActiveCampaignsSection campaigns={activeCampaigns} />
           <RecentActivitySection items={recentActivity} />
         </div>
 
-        <aside className="space-y-6 lg:col-span-4">
+        <aside className="space-y-5 lg:col-span-4">
+          <NextActionsCard actions={nextActions} />
           {profileCompletion ? (
             <ProfileCompletionCard profile={profileCompletion} />
           ) : null}
-          <NextActionsCard actions={nextActions} />
         </aside>
       </div>
     </div>
@@ -257,15 +257,15 @@ function MetricCard({
   return (
     <Link
       href={href}
-      className="group rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 hover:border-line-strong hover:shadow-[var(--shadow)]"
+      className="group rounded-[12px] border border-line bg-surface px-3 py-3 transition-colors duration-150 hover:border-line-strong hover:bg-page/40"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center justify-between gap-2">
         <IconShell tone={tone}>{icon}</IconShell>
-        <span className="text-2xl font-semibold tracking-tight text-ink">
+        <span className="text-xl font-semibold tracking-tight text-ink">
           {value}
         </span>
       </div>
-      <p className="mt-3 text-sm font-medium text-support group-hover:text-ink">
+      <p className="mt-2 text-[12px] font-medium text-support group-hover:text-ink">
         {label}
       </p>
     </Link>
@@ -282,9 +282,9 @@ function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-base font-semibold text-ink">{title}</h2>
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
         {action}
       </div>
       {children}
@@ -474,8 +474,8 @@ function ProfileCompletionCard({
   profile: ProfileCompletion;
 }) {
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)]">
-      <h2 className="text-base font-semibold text-ink">Company profile</h2>
+    <section className="rounded-[12px] border border-line bg-surface p-4">
+      <h2 className="text-[15px] font-semibold text-ink">Company profile</h2>
       <p className="mt-1 text-sm text-support">{profile.companyName}</p>
 
       <div className="mt-4">
@@ -555,11 +555,11 @@ function ProfileCompletionCard({
 
 function NextActionsCard({ actions }: { actions: NextBestAction[] }) {
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)]">
-      <h2 className="text-base font-semibold text-ink">Next best actions</h2>
+    <section className="rounded-[12px] border border-line bg-surface p-4">
+      <h2 className="text-[15px] font-semibold text-ink">Next actions</h2>
       {actions.length === 0 ? (
         <p className="mt-3 text-sm text-support">
-          You are caught up. Explore creators when you are ready to grow.
+          Nothing queued. Browse creators or open an active campaign.
         </p>
       ) : (
         <ul className="mt-4 space-y-3">

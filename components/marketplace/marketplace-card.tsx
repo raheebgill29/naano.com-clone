@@ -34,34 +34,35 @@ export function MarketplaceCreatorCard({
   const available = creator.availability === "available";
 
   return (
-    <article className="group flex h-full min-w-0 flex-col rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 hover:border-line-strong hover:shadow-[var(--shadow)] focus-within:border-accent/40">
-      <div className="flex min-w-0 items-start gap-2 sm:gap-3">
+    <article className="group flex h-full min-w-0 flex-col rounded-[12px] border border-line bg-surface p-3.5 transition-colors duration-150 hover:border-line-strong focus-within:border-accent/35">
+      <div className="flex min-w-0 items-start gap-2.5">
         <Link
           href={href}
-          className="min-w-0 flex-1 rounded-[12px] outline-none focus-visible:shadow-[var(--focus)]"
+          className="min-w-0 flex-1 rounded-[10px] outline-none focus-visible:shadow-[var(--focus)]"
         >
           <div className="flex min-w-0 items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent sm:h-12 sm:w-12">
+            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[10px] bg-page text-sm font-semibold text-ink-muted sm:h-16 sm:w-16">
               {creator.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={creator.avatar_url}
                   alt=""
-                  className="h-full w-full rounded-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               ) : (
-                initials(creator.full_name) || "C"
+                <span className="flex h-full w-full items-center justify-center bg-accent-soft text-accent">
+                  {initials(creator.full_name) || "C"}
+                </span>
               )}
             </div>
 
             <div className="min-w-0 flex-1">
-              <h2 className="break-words text-sm font-semibold leading-5 text-ink group-hover:text-accent">
-                {creator.full_name}
-              </h2>
-
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <h2 className="break-words text-[15px] font-semibold leading-5 text-ink group-hover:text-accent">
+                  {creator.full_name}
+                </h2>
                 <span
-                  className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                  className={`inline-flex rounded-[6px] px-1.5 py-0.5 text-[11px] font-semibold ${
                     available
                       ? "bg-success-soft text-success"
                       : "bg-page text-support"
@@ -70,7 +71,7 @@ export function MarketplaceCreatorCard({
                   {available ? "Available" : "Unavailable"}
                 </span>
                 {saved ? (
-                  <span className="inline-flex rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-semibold text-accent">
+                  <span className="inline-flex rounded-[6px] bg-accent-soft px-1.5 py-0.5 text-[11px] font-semibold text-accent">
                     Saved
                   </span>
                 ) : null}
@@ -82,7 +83,7 @@ export function MarketplaceCreatorCard({
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-support">
+          <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] text-support">
             <span className="font-medium text-ink-muted">
               {formatCompactCount(creator.audience_size)} followers
             </span>
@@ -93,29 +94,29 @@ export function MarketplaceCreatorCard({
           </div>
 
           {creator.topics.length ? (
-            <ul className="mt-3 flex flex-wrap gap-1.5">
+            <ul className="mt-2.5 flex flex-wrap gap-1.5">
               {creator.topics.slice(0, 3).map((topic) => (
                 <li
                   key={topic}
-                  className="max-w-full truncate rounded-[8px] bg-page px-2 py-1 text-xs font-medium text-ink-muted"
+                  className="max-w-full truncate rounded-[6px] bg-page px-2 py-0.5 text-[11px] font-medium text-ink-muted"
                 >
                   {topic}
                 </li>
               ))}
             </ul>
           ) : (
-            <div className="mt-3 h-7" aria-hidden />
+            <div className="mt-2.5 h-6" aria-hidden />
           )}
 
-          <div className="mt-4 flex flex-wrap items-end justify-between gap-2">
-            <p className="text-base font-semibold tracking-tight text-ink">
+          <div className="mt-3.5 flex flex-wrap items-end justify-between gap-2">
+            <p className="text-[15px] font-semibold tracking-tight text-ink">
               {formatPriceCents(creator.price_cents, creator.currency)}
-              <span className="ml-1 text-xs font-normal text-ink-subtle">
+              <span className="ml-1 text-[11px] font-normal text-ink-subtle">
                 / post
               </span>
             </p>
-            <span className="text-xs font-semibold text-accent sm:opacity-0 sm:transition-opacity sm:duration-150 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
-              View profile →
+            <span className="text-[12px] font-semibold text-accent sm:opacity-0 sm:transition-opacity sm:duration-150 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+              View profile
             </span>
           </div>
         </Link>
@@ -131,7 +132,7 @@ export function MarketplaceCreatorCard({
         </div>
       </div>
 
-      <div className="mt-auto border-t border-line pt-4">
+      <div className="mt-auto border-t border-line pt-3">
         <InviteToCampaignButton
           key={preferredCampaignId ?? "default-campaign"}
           creator={{
@@ -151,9 +152,9 @@ export function MarketplaceCreatorCard({
 
 export function MarketplaceCardSkeleton() {
   return (
-    <div className="flex h-full min-h-[280px] min-w-0 flex-col rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)]">
+    <div className="flex h-full min-h-[260px] min-w-0 flex-col rounded-[12px] border border-line bg-surface p-3.5">
       <div className="flex items-start gap-3">
-        <div className="h-12 w-12 shrink-0 animate-pulse rounded-full bg-page" />
+        <div className="h-16 w-16 shrink-0 animate-pulse rounded-[10px] bg-page" />
         <div className="min-w-0 flex-1 space-y-2">
           <div className="h-4 w-1/2 animate-pulse rounded bg-page" />
           <div className="h-3 w-full animate-pulse rounded bg-page" />
@@ -161,13 +162,13 @@ export function MarketplaceCardSkeleton() {
         </div>
         <div className="h-9 w-9 shrink-0 animate-pulse rounded-[10px] bg-page" />
       </div>
-      <div className="mt-4 h-3 w-2/3 animate-pulse rounded bg-page" />
-      <div className="mt-3 flex gap-2">
-        <div className="h-7 w-16 animate-pulse rounded bg-page" />
-        <div className="h-7 w-16 animate-pulse rounded bg-page" />
+      <div className="mt-3 h-3 w-2/3 animate-pulse rounded bg-page" />
+      <div className="mt-2.5 flex gap-2">
+        <div className="h-6 w-16 animate-pulse rounded bg-page" />
+        <div className="h-6 w-16 animate-pulse rounded bg-page" />
       </div>
-      <div className="mt-auto border-t border-line pt-4">
-        <div className="h-10 w-full animate-pulse rounded-[12px] bg-page" />
+      <div className="mt-auto border-t border-line pt-3">
+        <div className="h-10 w-full animate-pulse rounded-[10px] bg-page" />
       </div>
     </div>
   );

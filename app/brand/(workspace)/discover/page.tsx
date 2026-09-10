@@ -202,14 +202,13 @@ export default async function BrandDiscoverPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Marketplace"
         title="Discover creators"
         description={
           preferredCampaignName
-            ? `Inviting to “${preferredCampaignName}”. Choose a creator to send a booking request.`
+            ? `Inviting to “${preferredCampaignName}”.`
             : total > 0
-              ? `${total} creator${total === 1 ? "" : "s"} ready to browse for your next campaign.`
-              : "Find creators with clear pricing and invite them to your campaigns."
+              ? `${total} published creator${total === 1 ? "" : "s"}`
+              : "No published creators match these filters."
         }
         actions={
           <Link

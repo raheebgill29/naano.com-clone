@@ -73,7 +73,7 @@ export function CampaignListRow({
 
   return (
     <article
-      className={`rounded-[14px] border bg-surface shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 hover:border-line-strong hover:shadow-[var(--shadow)] ${
+      className={`rounded-[12px] border bg-surface transition-[border-color,box-shadow] duration-150 hover:border-line-strong ${
         attention ? "border-warning/35" : "border-line"
       }`}
     >
@@ -216,7 +216,7 @@ function Metric({
 }) {
   return (
     <div>
-      <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+      <dt className="text-[11px] font-medium text-ink-subtle">
         {label}
       </dt>
       <dd
@@ -377,7 +377,7 @@ function CampaignOverflowMenu({ item }: { item: CampaignListItem }) {
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 z-30 mt-2 w-64 rounded-[14px] border border-line bg-surface p-1 shadow-[var(--shadow)]"
+          className="absolute right-0 z-30 mt-2 w-64 rounded-[12px] border border-line bg-surface p-1 shadow-[var(--shadow)]"
         >
           {item.status === "draft" ? (
             <Link

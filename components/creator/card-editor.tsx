@@ -473,11 +473,11 @@ export function CreatorCardEditor({
         <div className="min-w-0 space-y-5">
           <section
             id="card-section-profile"
-            className="scroll-mt-24 rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5"
+            className="scroll-mt-24 rounded-[12px] border border-line bg-surface p-4 sm:p-5"
           >
             <h2 className="text-base font-semibold text-ink">Profile</h2>
             <p className="mt-1 text-sm text-support">
-              How you appear at a glance on your marketplace card.
+              Name, headline, and positioning for discovery.
             </p>
 
             <div className="mt-5 flex items-center gap-4">
@@ -494,10 +494,9 @@ export function CreatorCardEditor({
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-ink">Avatar</p>
+                <p className="text-sm font-medium text-ink">Portrait</p>
                 <p className="mt-0.5 text-xs text-support">
-                  Uses your account photo when available. Initials show as a
-                  fallback.
+                  From your account photo when set.
                 </p>
               </div>
             </div>
@@ -560,7 +559,7 @@ export function CreatorCardEditor({
 
           <section
             id="card-section-audience"
-            className="scroll-mt-24 rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5"
+            className="scroll-mt-24 rounded-[12px] border border-line bg-surface p-4 sm:p-5"
           >
             <h2 className="text-base font-semibold text-ink">Audience</h2>
             <p className="mt-1 text-sm text-support">
@@ -612,7 +611,7 @@ export function CreatorCardEditor({
 
           <section
             id="card-section-offer"
-            className="scroll-mt-24 rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5"
+            className="scroll-mt-24 rounded-[12px] border border-line bg-surface p-4 sm:p-5"
           >
             <h2 className="text-base font-semibold text-ink">Offer</h2>
             <p className="mt-1 text-sm text-support">
@@ -679,7 +678,7 @@ export function CreatorCardEditor({
                         availability === value
                           ? value === "available"
                             ? "bg-success-soft text-success"
-                            : "bg-surface text-ink shadow-[var(--shadow-sm)]"
+                            : "bg-surface text-ink"
                           : "text-support hover:text-ink"
                       }`}
                     >
@@ -711,9 +710,9 @@ export function CreatorCardEditor({
         >
           <div className="sticky top-20 space-y-4">
             <div>
-              <h2 className="text-base font-semibold text-ink">Brand preview</h2>
+              <h2 className="text-[15px] font-semibold text-ink">Marketplace preview</h2>
               <p className="mt-1 text-sm text-support">
-                How your card appears in discovery. Updates as you edit.
+                Public listing as brands see it.
               </p>
             </div>
             {previewCard}
@@ -730,7 +729,7 @@ export function CreatorCardEditor({
       </div>
 
       {/* Sticky action bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 px-4 py-3 shadow-[var(--shadow)] backdrop-blur-sm lg:static lg:z-auto lg:mt-2 lg:rounded-[14px] lg:border lg:bg-surface lg:backdrop-blur-none">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 px-4 py-3 shadow-[var(--shadow)] backdrop-blur-sm lg:static lg:z-auto lg:mt-2 lg:rounded-[12px] lg:border lg:bg-surface lg:backdrop-blur-none">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <p className="text-xs font-medium text-support">
             {dirty ? "Unsaved changes" : "All changes saved"}
@@ -778,7 +777,7 @@ export function CreatorCardEditor({
                 {overflowOpen ? (
                   <div
                     role="menu"
-                    className="absolute bottom-full right-0 z-40 mb-2 w-48 rounded-[14px] border border-line bg-surface p-1 shadow-[var(--shadow)] lg:bottom-auto lg:top-full lg:mb-0 lg:mt-2"
+                    className="absolute bottom-full right-0 z-40 mb-2 w-48 rounded-[12px] border border-line bg-surface p-1 shadow-[var(--shadow)] lg:bottom-auto lg:top-full lg:mb-0 lg:mt-2"
                   >
                     <button
                       type="button"
@@ -889,11 +888,11 @@ function ReadinessCard({
   missing: Array<{ id: string; label: string }>;
 }) {
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)]">
+    <section className="rounded-[12px] border border-line bg-surface p-4">
       <h3 className="text-sm font-semibold text-ink">Profile readiness</h3>
       {ready ? (
         <p className="mt-2 text-sm font-medium text-success">
-          Ready to be discovered.
+          Ready to publish.
         </p>
       ) : (
         <ul className="mt-2 space-y-1.5 text-sm text-support">
@@ -928,7 +927,7 @@ function PublicLinkControl({ path }: { path: string }) {
   }
 
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)]">
+    <section className="rounded-[12px] border border-line bg-surface p-4">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-ink">Public profile</h3>
         <Link

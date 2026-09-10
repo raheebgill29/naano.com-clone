@@ -51,9 +51,9 @@ export function InboxPanel({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface">
-      <div className="shrink-0 border-b border-line px-4 py-4">
+      <div className="shrink-0 border-b border-line px-3.5 py-3">
         <div className="flex items-center justify-between gap-2">
-          <h1 className="text-lg font-semibold tracking-tight text-ink">
+          <h1 className="text-[15px] font-semibold tracking-tight text-ink">
             Messages
           </h1>
           {unreadCount > 0 ? (
@@ -63,18 +63,18 @@ export function InboxPanel({
           ) : null}
         </div>
 
-        <label className="mt-3 block">
+        <label className="mt-2.5 block">
           <span className="sr-only">Search conversations</span>
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search people or campaigns"
-            className="h-10 w-full rounded-lg border border-line bg-[#f7f8fa] px-3 text-sm text-ink placeholder:text-ink-subtle outline-none transition focus:border-accent focus:bg-surface"
+            className="h-9 w-full rounded-[10px] border border-line bg-page px-3 text-sm text-ink placeholder:text-ink-subtle outline-none transition focus:border-accent focus:bg-surface"
           />
         </label>
 
-        <div className="mt-3 flex gap-1 rounded-lg bg-[#f7f8fa] p-1" role="tablist" aria-label="Conversation filters">
+        <div className="mt-2.5 flex gap-1 rounded-[10px] bg-page p-1" role="tablist" aria-label="Conversation filters">
           {([
             { key: "all", label: "All" },
             { key: "unread", label: "Unread" },
@@ -85,9 +85,9 @@ export function InboxPanel({
               role="tab"
               aria-selected={filter === tab.key}
               onClick={() => setFilter(tab.key)}
-              className={`flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition ${
+              className={`flex-1 rounded-[8px] px-2 py-1.5 text-xs font-semibold transition ${
                 filter === tab.key
-                  ? "bg-surface text-ink shadow-sm"
+                  ? "bg-surface text-ink border border-line"
                   : "text-support hover:text-ink"
               }`}
             >

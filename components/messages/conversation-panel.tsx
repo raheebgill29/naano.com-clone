@@ -305,7 +305,7 @@ function Timeline({
           return (
             <div key={row.key} className="flex justify-center">
               <div className="max-w-[90%] rounded-lg border border-dashed border-line-strong bg-[#f7f8fa] px-3 py-2 text-center">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-support">
+                <p className="text-[11px] font-medium text-support">
                   {row.item.eventType.replace(/_/g, " ")}
                 </p>
                 {row.item.message ? (

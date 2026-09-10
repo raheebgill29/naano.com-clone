@@ -164,7 +164,7 @@ export function CollaborationDetailWorkspace({
         )}
       </nav>
 
-      <header className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+      <header className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -246,7 +246,7 @@ export function CollaborationDetailWorkspace({
 
       <section
         id="workflow-action"
-        className={`scroll-mt-24 rounded-[14px] border p-4 shadow-[var(--shadow-sm)] sm:p-5 ${
+        className={`scroll-mt-24 rounded-[12px] border p-4 sm:p-5 ${
           waiting
             ? "border-line bg-page"
             : readOnly
@@ -256,7 +256,7 @@ export function CollaborationDetailWorkspace({
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+            <p className="text-[11px] font-medium text-ink-subtle">
               Required action
             </p>
             <h2 className="mt-1 text-base font-semibold text-ink">
@@ -294,7 +294,7 @@ export function CollaborationDetailWorkspace({
       <div className="grid gap-5 lg:grid-cols-12">
         <div className="min-w-0 space-y-5 lg:col-span-8">
           {collab.status === "revision_requested" && collab.latest_feedback ? (
-            <section className="rounded-[14px] border border-warning/35 bg-warning-soft/40 p-4 sm:p-5">
+            <section className="rounded-[12px] border border-warning/35 bg-warning-soft/40 p-4 sm:p-5">
               <h2 className="text-base font-semibold text-ink">
                 Revision feedback
               </h2>
@@ -320,7 +320,7 @@ export function CollaborationDetailWorkspace({
           )}
 
           {collab.cancel_reason ? (
-            <section className="rounded-[14px] border border-danger/25 bg-danger-soft/30 p-4 sm:p-5">
+            <section className="rounded-[12px] border border-danger/25 bg-danger-soft/30 p-4 sm:p-5">
               <h2 className="text-base font-semibold text-ink">
                 Cancellation reason
               </h2>
@@ -331,7 +331,7 @@ export function CollaborationDetailWorkspace({
           {canCancel ? (
             <section
               id="cancel-collab"
-              className="scroll-mt-24 rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5"
+              className="scroll-mt-24 rounded-[12px] border border-line bg-surface p-4 sm:p-5"
             >
               <h2 className="text-base font-semibold text-ink">
                 Cancel collaboration
@@ -463,7 +463,7 @@ function ActionSurface({
 function LatestDraftCard({ draft }: { draft: ContentSubmission | null }) {
   if (!draft) {
     return (
-      <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+      <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
         <h2 className="text-base font-semibold text-ink">Latest draft</h2>
         <p className="mt-3 text-sm text-support">No drafts submitted yet.</p>
       </section>
@@ -474,7 +474,7 @@ function LatestDraftCard({ draft }: { draft: ContentSubmission | null }) {
   const href = draft.asset_url ? safeExternalHref(draft.asset_url) : null;
 
   return (
-    <section className="rounded-[14px] border border-accent/25 bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <section className="rounded-[12px] border border-accent/25 bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-base font-semibold text-ink">
           Latest draft · Version {draft.version}
@@ -516,7 +516,7 @@ function LatestDraftCard({ draft }: { draft: ContentSubmission | null }) {
 function DraftHistory({ drafts }: { drafts: ContentSubmission[] }) {
   const [open, setOpen] = useState(false);
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <button
         type="button"
         className="flex w-full items-center justify-between gap-3 text-left"
@@ -587,7 +587,7 @@ function PublishSection({
     : null;
 
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <h2 className="text-base font-semibold text-ink">
         Scheduling & publishing
       </h2>
@@ -613,7 +613,7 @@ function PublishSection({
       </dl>
       {publishedHref ? (
         <div className="mt-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+          <p className="text-[11px] font-medium text-ink-subtle">
             Published URL
           </p>
           <a
@@ -646,7 +646,7 @@ function ActivityTimeline({
   actorNames: Record<string, string>;
 }) {
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <h2 className="text-base font-semibold text-ink">Activity</h2>
       {events.length === 0 ? (
         <p className="mt-3 text-sm text-support">No activity yet.</p>
@@ -709,7 +709,7 @@ function SummaryCard({
   otherMeta: string | null;
 }) {
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <h2 className="text-sm font-semibold text-ink">Collaboration summary</h2>
       <div className="mt-3 flex items-start gap-3">
         <ParticipantAvatar name={otherName} />
@@ -730,7 +730,7 @@ function SummaryCard({
       </div>
       <dl className="mt-4 space-y-3 text-sm">
         <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+          <dt className="text-[11px] font-medium text-ink-subtle">
             Compensation
           </dt>
           <dd className="mt-0.5 font-semibold text-ink">
@@ -746,13 +746,13 @@ function SummaryCard({
           </dd>
         </div>
         <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+          <dt className="text-[11px] font-medium text-ink-subtle">
             Deliverable
           </dt>
           <dd className="mt-0.5 text-ink">{campaign.deliverable_type}</dd>
         </div>
         <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+          <dt className="text-[11px] font-medium text-ink-subtle">
             Target date
           </dt>
           <dd className="mt-0.5 text-ink">
@@ -760,7 +760,7 @@ function SummaryCard({
           </dd>
         </div>
         <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+          <dt className="text-[11px] font-medium text-ink-subtle">
             Scheduled
           </dt>
           <dd className="mt-0.5 text-ink">
@@ -770,7 +770,7 @@ function SummaryCard({
           </dd>
         </div>
         <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+          <dt className="text-[11px] font-medium text-ink-subtle">
             Campaign
           </dt>
           <dd className="mt-0.5 text-ink">
@@ -804,7 +804,7 @@ function MessagePreviewCard({
   otherName: string;
 }) {
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-ink">Conversation</h2>
         {preview?.unread ? (
@@ -841,7 +841,7 @@ function BriefCard({
   role: "brand" | "creator";
 }) {
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <h2 className="text-sm font-semibold text-ink">Campaign brief</h2>
       <p className="mt-2 text-sm text-ink">{campaign.objective}</p>
       <p className="mt-3 whitespace-pre-wrap text-sm text-support">
@@ -849,7 +849,7 @@ function BriefCard({
       </p>
       {role === "creator" ? (
         <div className="mt-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+          <p className="text-[11px] font-medium text-ink-subtle">
             Guidelines
           </p>
           <p className="mt-1 whitespace-pre-wrap text-sm text-support">
@@ -907,7 +907,7 @@ function DetailOverflow({
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 z-30 mt-2 w-56 rounded-[14px] border border-line bg-surface p-1 shadow-[var(--shadow)]"
+          className="absolute right-0 z-30 mt-2 w-56 rounded-[12px] border border-line bg-surface p-1 shadow-[var(--shadow)]"
         >
           <Link
             role="menuitem"

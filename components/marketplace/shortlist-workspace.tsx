@@ -235,7 +235,7 @@ export function ShortlistWorkspace({
 
   if (creators.length === 0) {
     return (
-      <div className="rounded-[14px] border border-dashed border-line-strong bg-surface px-6 py-14 text-center shadow-[var(--shadow-sm)]">
+      <div className="rounded-[12px] border border-dashed border-line-strong bg-surface px-6 py-14 text-center">
         <span
           className="mx-auto flex h-12 w-12 items-center justify-center rounded-[12px] bg-accent-soft text-accent"
           aria-hidden
@@ -260,15 +260,15 @@ export function ShortlistWorkspace({
           href="/brand/discover"
           className="mt-5 inline-flex items-center justify-center rounded-[12px] bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
         >
-          Explore marketplace
+          Browse creators
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-[14px] border border-line bg-surface p-3 shadow-[var(--shadow-sm)] sm:p-4">
+    <div className="space-y-3">
+      <div className="rounded-[12px] border border-line bg-surface p-2.5 sm:p-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <form
             role="search"

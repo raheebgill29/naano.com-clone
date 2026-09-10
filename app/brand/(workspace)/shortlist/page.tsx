@@ -37,16 +37,15 @@ export default async function BrandShortlistPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Shortlist"
-        title="Saved creators"
+        title="Shortlist"
         description={
           count > 0
-            ? `${count} saved creator${count === 1 ? "" : "s"} ready to review and invite to campaigns.`
-            : "Save creators from the marketplace, then review and invite them to campaigns."
+            ? `${count} saved creator${count === 1 ? "" : "s"}`
+            : "Save creators from Discover to compare and invite."
         }
         actions={
           <PrimaryLink href="/brand/discover" className="!w-auto">
-            Explore marketplace
+            Browse creators
           </PrimaryLink>
         }
       />

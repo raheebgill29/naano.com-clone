@@ -270,7 +270,7 @@ export function CollaborationsWorkspace({
         })}
       </div>
 
-      <div className="rounded-[14px] border border-line bg-surface p-3 shadow-[var(--shadow-sm)] sm:p-4">
+      <div className="rounded-[12px] border border-line bg-surface p-3 sm:p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <form
             onSubmit={onSearchSubmit}
@@ -478,13 +478,13 @@ function SummaryStrip({
             key={cell.key}
             type="button"
             onClick={() => onSelect(cell.key)}
-            className={`rounded-[14px] border px-3 py-3 text-left shadow-[var(--shadow-sm)] transition-colors duration-150 ${
+            className={`rounded-[12px] border px-3 py-3 text-left transition-colors duration-150 ${
               selected
                 ? "border-accent/40 bg-accent-soft"
                 : "border-line bg-surface hover:border-line-strong"
             }`}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+            <p className="text-[11px] font-medium text-ink-subtle">
               {cell.label}
             </p>
             <p className="mt-1 text-xl font-semibold tabular-nums tracking-tight text-ink">
@@ -503,7 +503,7 @@ export function CollaborationsListSkeleton() {
       {Array.from({ length: 4 }).map((_, index) => (
         <li
           key={index}
-          className="h-36 animate-pulse rounded-[14px] border border-line bg-surface"
+          className="h-36 animate-pulse rounded-[12px] border border-line bg-surface"
         />
       ))}
     </ul>

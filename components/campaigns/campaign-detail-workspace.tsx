@@ -155,7 +155,7 @@ export function CampaignDetailWorkspace({
         </Link>
       </nav>
 
-      <header className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+      <header className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -310,11 +310,11 @@ function SummaryStrip({
   ];
 
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)]">
+    <section className="rounded-[12px] border border-line bg-surface p-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         {cells.map((cell) => (
           <div key={cell.label} className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+            <p className="text-[11px] font-medium text-ink-subtle">
               {cell.label}
             </p>
             <p className="mt-1 truncate text-sm font-semibold text-ink">
@@ -370,7 +370,7 @@ function OverviewSection({
   return (
     <div className="grid gap-5 lg:grid-cols-12">
       <div className="min-w-0 space-y-5 lg:col-span-8">
-        <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
+        <section className="rounded-[12px] border border-line bg-surface p-5 sm:p-6">
           <h2 className="text-base font-semibold text-ink">Campaign brief</h2>
           {canEdit ? (
             <div className="mt-4">
@@ -395,7 +395,7 @@ function OverviewSection({
                 />
               </div>
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+                <h3 className="text-[11px] font-medium text-ink-subtle">
                   Key messages
                 </h3>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-ink">
@@ -420,7 +420,7 @@ function OverviewSection({
       </div>
 
       <aside className="min-w-0 space-y-4 lg:col-span-4">
-        <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+        <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
           <h2 className="text-sm font-semibold text-ink">Status</h2>
           <span
             className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${campaignStatusBadgeClass(status)}`}
@@ -432,7 +432,7 @@ function OverviewSection({
           </p>
         </section>
 
-        <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+        <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
           <h2 className="text-sm font-semibold text-ink">Budget summary</h2>
           <dl className="mt-3 space-y-2 text-sm">
             <div className="flex justify-between gap-3">
@@ -459,7 +459,7 @@ function OverviewSection({
           </dl>
         </section>
 
-        <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+        <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
           <h2 className="text-sm font-semibold text-ink">Next action</h2>
           {primary ? (
             <div className="mt-3">
@@ -484,7 +484,7 @@ function OverviewSection({
         {(blockers.pendingInvitations > 0 ||
           blockers.activeCollaborations > 0) &&
         (status === "active" || status === "paused") ? (
-          <section className="rounded-[14px] border border-warning/30 bg-warning-soft/40 p-4">
+          <section className="rounded-[12px] border border-warning/30 bg-warning-soft/40 p-4">
             <h2 className="text-sm font-semibold text-ink">Blockers</h2>
             <p className="mt-2 text-sm text-support">
               Before completing:{" "}
@@ -518,7 +518,7 @@ function BriefBlock({
 }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+      <h3 className="text-[11px] font-medium text-ink-subtle">
         {title}
       </h3>
       <p
@@ -544,7 +544,7 @@ function CreatorsSection({
   loadedAtMs: number;
 }) {
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-ink">
           Creators and invitations
@@ -619,7 +619,7 @@ function InvitationRow({
     !(invite.status === "cancelled" && !invite.accepted_at);
 
   return (
-    <article className="rounded-[14px] border border-line bg-surface p-4 transition-colors hover:border-line-strong">
+    <article className="rounded-[12px] border border-line bg-surface p-4 transition-colors hover:border-line-strong">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
           <ParticipantAvatar name={name} />
@@ -637,7 +637,7 @@ function InvitationRow({
             </p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
               <div>
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+                <dt className="text-[11px] font-medium text-ink-subtle">
                   Price
                 </dt>
                 <dd className="mt-0.5 font-medium text-ink">
@@ -645,7 +645,7 @@ function InvitationRow({
                 </dd>
               </div>
               <div>
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+                <dt className="text-[11px] font-medium text-ink-subtle">
                   Posts
                 </dt>
                 <dd className="mt-0.5 font-medium text-ink">
@@ -653,7 +653,7 @@ function InvitationRow({
                 </dd>
               </div>
               <div>
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+                <dt className="text-[11px] font-medium text-ink-subtle">
                   Total
                 </dt>
                 <dd className="mt-0.5 font-semibold text-ink">
@@ -661,7 +661,7 @@ function InvitationRow({
                 </dd>
               </div>
               <div>
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+                <dt className="text-[11px] font-medium text-ink-subtle">
                   Updated
                 </dt>
                 <dd className="mt-0.5 text-ink">
@@ -734,7 +734,7 @@ function CollaborationsSection({
           <li key={inv.id}>
             <Link
               href={`/brand/collaborations/${inv.id}`}
-              className={`block rounded-[14px] border bg-surface p-4 shadow-[var(--shadow-sm)] transition-colors hover:border-line-strong ${
+              className={`block rounded-[12px] border bg-surface p-4 transition-colors hover:border-line-strong ${
                 attention ? "border-warning/40" : "border-line"
               }`}
             >
@@ -795,7 +795,7 @@ function ActivitySection({
   }
 
   return (
-    <section className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <h2 className="text-base font-semibold text-ink">Activity</h2>
       <ol className="mt-4 space-y-0">
         {activity.map((item, index) => (
@@ -926,7 +926,7 @@ function DetailOverflowMenu({
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 z-30 mt-2 w-64 rounded-[14px] border border-line bg-surface p-1 shadow-[var(--shadow)]"
+          className="absolute right-0 z-30 mt-2 w-64 rounded-[12px] border border-line bg-surface p-1 shadow-[var(--shadow)]"
         >
           {canEdit ? (
             <Link
@@ -1054,8 +1054,8 @@ export function CampaignDetailSkeleton() {
   return (
     <div className="space-y-5">
       <div className="h-4 w-40 animate-pulse rounded bg-page" />
-      <div className="h-28 animate-pulse rounded-[14px] border border-line bg-surface" />
-      <div className="h-24 animate-pulse rounded-[14px] border border-line bg-surface" />
+      <div className="h-28 animate-pulse rounded-[12px] border border-line bg-surface" />
+      <div className="h-24 animate-pulse rounded-[12px] border border-line bg-surface" />
       <div className="flex gap-2">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
@@ -1064,7 +1064,7 @@ export function CampaignDetailSkeleton() {
           />
         ))}
       </div>
-      <div className="h-64 animate-pulse rounded-[14px] border border-line bg-surface" />
+      <div className="h-64 animate-pulse rounded-[12px] border border-line bg-surface" />
     </div>
   );
 }

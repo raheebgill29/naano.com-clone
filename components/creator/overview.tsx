@@ -130,14 +130,13 @@ export function CreatorOverview({
   return (
     <div className="space-y-8">
       <PageHeader
-        eyebrow="Creator workspace"
         title={`Welcome back, ${firstName}`}
-        description="Review your public profile, track opportunities, and deliver accepted collaborations."
+        description="Profile, opportunities, and active delivery."
       />
 
       <section
         aria-label="Workspace counts"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-4"
       >
         <Metric
           label="Pending opportunities"
@@ -166,7 +165,7 @@ export function CreatorOverview({
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-        <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
+        <section className="rounded-[12px] border border-line bg-surface p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold text-ink">Creator card</h2>
@@ -224,7 +223,7 @@ export function CreatorOverview({
           </div>
         </section>
 
-        <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
+        <section className="rounded-[12px] border border-line bg-surface p-5 sm:p-6">
           <h2 className="text-base font-semibold text-ink">Launch guide</h2>
           <p className="mt-1 text-sm text-support">
             {completed} of {checklist.length} setup steps complete
@@ -262,7 +261,7 @@ export function CreatorOverview({
         </section>
       </div>
 
-      <section className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)] sm:p-6">
+      <section className="rounded-[12px] border border-line bg-surface p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-ink">Opportunities</h2>
@@ -319,7 +318,7 @@ function Metric({
   href?: string;
 }) {
   const body = (
-    <article className="rounded-[14px] border border-line bg-surface p-5 shadow-[var(--shadow-sm)]">
+    <article className="rounded-[12px] border border-line bg-surface p-5">
       <p className="text-sm font-medium text-support">{label}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-ink">
         {value}
@@ -330,7 +329,7 @@ function Metric({
   return href ? (
     <Link
       href={href}
-      className="block rounded-[14px] transition-[opacity] duration-150 hover:opacity-95"
+      className="block rounded-[12px] transition-[opacity] duration-150 hover:opacity-95"
     >
       {body}
     </Link>

@@ -29,20 +29,22 @@ export function ShortlistCreatorCard({
   const shownTopics = creator.topics.slice(0, 3);
 
   return (
-    <article className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 hover:border-line-strong hover:shadow-[var(--shadow)] sm:p-5">
+    <article className="rounded-[12px] border border-line bg-surface p-4 transition-[border-color,box-shadow] duration-150 hover:border-line-strong sm:p-5">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-stretch lg:gap-0">
         {/* Identity */}
         <div className="flex min-w-0 flex-[1.15] gap-4 lg:pr-6">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-accent-soft text-base font-semibold text-accent sm:h-[4.5rem] sm:w-[4.5rem] sm:text-lg">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-page text-base font-semibold text-ink-muted sm:h-[4.5rem] sm:w-[4.5rem] sm:text-lg">
             {creator.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={creator.avatar_url}
                 alt=""
-                className="h-full w-full rounded-full object-cover"
+                className="h-full w-full object-cover"
               />
             ) : (
-              initials(creator.full_name) || "C"
+              <span className="flex h-full w-full items-center justify-center bg-accent-soft text-accent">
+                {initials(creator.full_name) || "C"}
+              </span>
             )}
           </div>
 
@@ -84,7 +86,7 @@ export function ShortlistCreatorCard({
         <div className="min-w-0 flex-1 border-t border-line pt-4 lg:border-l lg:border-t-0 lg:px-6 lg:pt-0">
           <div className="space-y-3.5">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+              <p className="text-[11px] font-medium text-ink-subtle">
                 Followers
               </p>
               <p className="mt-1 text-sm font-semibold text-ink">
@@ -94,7 +96,7 @@ export function ShortlistCreatorCard({
 
             {creator.audience_summary ? (
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+                <p className="text-[11px] font-medium text-ink-subtle">
                   Audience
                 </p>
                 <p className="mt-1 line-clamp-2 text-sm leading-5 text-support">
@@ -104,7 +106,7 @@ export function ShortlistCreatorCard({
             ) : null}
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+              <p className="text-[11px] font-medium text-ink-subtle">
                 Specialties
               </p>
               {shownTopics.length ? (
@@ -134,7 +136,7 @@ export function ShortlistCreatorCard({
         <div className="flex min-w-0 flex-col gap-4 border-t border-line pt-4 sm:flex-row sm:items-end sm:justify-between lg:w-[15rem] lg:shrink-0 lg:flex-col lg:items-stretch lg:justify-between lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+              <p className="text-[11px] font-medium text-ink-subtle">
                 Price
               </p>
               <p className="mt-1 text-xl font-semibold tracking-tight text-ink">
@@ -178,7 +180,7 @@ export function ShortlistCreatorCard({
 
 export function ShortlistCreatorCardSkeleton() {
   return (
-    <div className="rounded-[14px] border border-line bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5">
+    <div className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <div className="flex flex-col gap-5 lg:flex-row lg:gap-6">
         <div className="flex flex-1 gap-4">
           <div className="h-16 w-16 shrink-0 animate-pulse rounded-full bg-page sm:h-[4.5rem] sm:w-[4.5rem]" />

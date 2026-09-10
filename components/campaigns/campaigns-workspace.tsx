@@ -188,7 +188,7 @@ export function CampaignsWorkspace({
         }
       />
 
-      <div className="rounded-[14px] border border-line bg-surface p-3 shadow-[var(--shadow-sm)] sm:p-4">
+      <div className="rounded-[12px] border border-line bg-surface p-3 sm:p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <form
             onSubmit={onSearchSubmit}
@@ -387,7 +387,7 @@ export function CampaignsListSkeleton() {
       {Array.from({ length: 4 }).map((_, index) => (
         <li
           key={index}
-          className="h-36 animate-pulse rounded-[14px] border border-line bg-surface"
+          className="h-36 animate-pulse rounded-[12px] border border-line bg-surface"
         />
       ))}
     </ul>

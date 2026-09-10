@@ -79,7 +79,7 @@ export function CollaborationListRow({
 
   return (
     <article
-      className={`rounded-[14px] border bg-surface shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 hover:border-line-strong hover:shadow-[var(--shadow)] ${
+      className={`rounded-[12px] border bg-surface transition-[border-color,box-shadow] duration-150 hover:border-line-strong ${
         tone === "warning"
           ? "border-warning/40"
           : tone === "accent"
@@ -134,7 +134,7 @@ export function CollaborationListRow({
 
               <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-3">
                 <div className="min-w-0">
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+                  <dt className="text-[11px] font-medium text-ink-subtle">
                     Deliverable
                   </dt>
                   <dd className="mt-0.5 truncate font-medium text-ink">
@@ -142,7 +142,7 @@ export function CollaborationListRow({
                   </dd>
                 </div>
                 <div className="min-w-0">
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+                  <dt className="text-[11px] font-medium text-ink-subtle">
                     Compensation
                   </dt>
                   <dd className="mt-0.5 truncate font-semibold text-ink">
@@ -150,7 +150,7 @@ export function CollaborationListRow({
                   </dd>
                 </div>
                 <div className="min-w-0 col-span-2 sm:col-span-1">
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-subtle">
+                  <dt className="text-[11px] font-medium text-ink-subtle">
                     {dateLabel ?? "Date"}
                   </dt>
                   <dd
