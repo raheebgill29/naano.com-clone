@@ -90,10 +90,12 @@ function useDialogChrome(open: boolean, onClose: () => void) {
 export function InviteToCampaignButton({
   creator,
   campaigns,
+  preferredCampaignId,
   className = "",
 }: {
   creator: CreatorSummary;
   campaigns: EligibleCampaign[];
+  preferredCampaignId?: string;
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -104,10 +106,14 @@ export function InviteToCampaignButton({
   const options = (campaigns ?? []).filter(
     (c) => c.status === "draft" || c.status === "active",
   );
-  const [selected, setSelected] = useState(options[0]?.id ?? "");
+  const preferred =
+    preferredCampaignId && options.some((c) => c.id === preferredCampaignId)
+      ? preferredCampaignId
+      : (options[0]?.id ?? "");
+  const [selected, setSelected] = useState(preferred);
   const selectedId = options.some((c) => c.id === selected)
     ? selected
-    : (options[0]?.id ?? "");
+    : preferred;
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

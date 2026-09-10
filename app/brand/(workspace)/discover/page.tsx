@@ -45,6 +45,7 @@ export default async function BrandDiscoverPage({
   const params = await searchParams;
   const savedOnly = first(params.saved) === "1";
   const page = Math.max(1, toInt(first(params.page)) ?? 1);
+  const preferredCampaignId = first(params.campaignId);
   const availability =
     (first(params.availability) as
       | "available"
@@ -181,6 +182,10 @@ export default async function BrandDiscoverPage({
   );
 
   const totalPages = Math.max(1, Math.ceil(total / 12));
+  const preferredCampaignName = preferredCampaignId
+    ? (eligibleCampaigns ?? []).find((c) => c.id === preferredCampaignId)
+        ?.campaign_name
+    : null;
   const resultSummary =
     error
       ? "Unable to load results"
@@ -200,9 +205,11 @@ export default async function BrandDiscoverPage({
         eyebrow="Marketplace"
         title="Discover creators"
         description={
-          total > 0
-            ? `${total} creator${total === 1 ? "" : "s"} ready to browse for your next campaign.`
-            : "Find creators with clear pricing and invite them to your campaigns."
+          preferredCampaignName
+            ? `Inviting to “${preferredCampaignName}”. Choose a creator to send a booking request.`
+            : total > 0
+              ? `${total} creator${total === 1 ? "" : "s"} ready to browse for your next campaign.`
+              : "Find creators with clear pricing and invite them to your campaigns."
         }
         actions={
           <Link
@@ -280,6 +287,7 @@ export default async function BrandDiscoverPage({
                   creator={creator}
                   saved={savedIds.has(creator.id)}
                   campaigns={eligibleCampaigns ?? []}
+                  preferredCampaignId={preferredCampaignId}
                 />
               </li>
             ))}

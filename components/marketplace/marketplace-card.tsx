@@ -16,6 +16,7 @@ export function MarketplaceCreatorCard({
   creator,
   saved,
   campaigns,
+  preferredCampaignId,
   undoableRemove = false,
 }: {
   creator: MarketplaceCreator;
@@ -25,6 +26,7 @@ export function MarketplaceCreatorCard({
     campaign_name: string;
     status: CampaignStatus;
   }>;
+  preferredCampaignId?: string;
   /** Enable undo toast when removing from shortlist */
   undoableRemove?: boolean;
 }) {
@@ -131,6 +133,7 @@ export function MarketplaceCreatorCard({
 
       <div className="mt-auto border-t border-line pt-4">
         <InviteToCampaignButton
+          key={preferredCampaignId ?? "default-campaign"}
           creator={{
             id: creator.id,
             full_name: creator.full_name,
@@ -139,6 +142,7 @@ export function MarketplaceCreatorCard({
             currency: creator.currency,
           }}
           campaigns={campaigns}
+          preferredCampaignId={preferredCampaignId}
         />
       </div>
     </article>
