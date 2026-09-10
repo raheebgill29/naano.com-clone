@@ -1,5 +1,8 @@
 import type { CampaignCreatorStatus } from "@/lib/supabase/database.types";
-import { STATUS_LABEL } from "@/lib/collaborations/status";
+import {
+  STATUS_LABEL,
+  collaborationStatusBadgeClass,
+} from "@/lib/collaborations/status";
 import { initials } from "@/components/workspace/ui";
 
 export function ParticipantAvatar({
@@ -27,18 +30,9 @@ export function CollaborationStatusBadge({
 }: {
   status: CampaignCreatorStatus;
 }) {
-  const tone =
-    status === "completed"
-      ? "bg-success-soft text-success"
-      : status === "cancelled" || status === "declined"
-        ? "bg-danger-soft text-danger"
-        : status === "revision_requested" || status === "draft_submitted"
-          ? "bg-warning-soft text-warning"
-          : "bg-accent-soft text-accent";
-
   return (
     <span
-      className={`inline-flex items-center rounded-[8px] px-2 py-0.5 text-[11px] font-semibold ${tone}`}
+      className={`inline-flex items-center rounded-[8px] px-2 py-0.5 text-[11px] font-semibold ${collaborationStatusBadgeClass(status)}`}
     >
       {STATUS_LABEL[status]}
     </span>
