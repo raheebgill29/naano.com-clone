@@ -13,6 +13,7 @@ export function CreatorPublicCard({
   href,
   actions,
   compact = false,
+  preview = false,
 }: {
   creator: Pick<
     MarketplaceCreator,
@@ -27,21 +28,43 @@ export function CreatorPublicCard({
     | "languages"
     | "bio"
     | "audience_summary"
-  >;
+  > & {
+    avatar_url?: string | null;
+  };
   href?: string;
   actions?: ReactNode;
   compact?: boolean;
+  /** Softer empty placeholders for live editor preview */
+  preview?: boolean;
 }) {
+  const name = creator.full_name.trim() || (preview ? "Add your name" : "Creator");
+  const headline =
+    creator.headline.trim() || (preview ? "Add a headline" : "");
+  const hasPrice = creator.price_cents > 0 || !preview;
+
   const content = (
     <>
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent">
-          {initials(creator.full_name) || "C"}
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent-soft text-sm font-semibold text-accent">
+          {creator.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={creator.avatar_url}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            initials(name) || "C"
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-sm font-semibold text-ink">
-              {creator.full_name}
+            <p
+              className={`truncate text-sm font-semibold ${
+                creator.full_name.trim() ? "text-ink" : "text-ink-subtle"
+              }`}
+            >
+              {name}
             </p>
             <span
               className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
@@ -55,12 +78,20 @@ export function CreatorPublicCard({
                 : "Unavailable"}
             </span>
           </div>
-          <p className="mt-0.5 line-clamp-2 text-sm text-support">
-            {creator.headline}
+          <p
+            className={`mt-0.5 line-clamp-2 text-sm ${
+              creator.headline.trim() ? "text-support" : "text-ink-subtle"
+            }`}
+          >
+            {headline || "—"}
           </p>
         </div>
         <p className="shrink-0 text-right text-sm font-semibold text-ink">
-          {formatPriceCents(creator.price_cents, creator.currency)}
+          {hasPrice
+            ? formatPriceCents(creator.price_cents, creator.currency)
+            : preview
+              ? "Set price"
+              : formatPriceCents(0, creator.currency)}
           <span className="block text-[11px] font-normal text-ink-subtle">
             / post
           </span>
@@ -68,8 +99,18 @@ export function CreatorPublicCard({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-support">
-        <span>{formatCompactCount(creator.audience_size)} followers</span>
-        {creator.location ? <span>{creator.location}</span> : null}
+        <span>
+          {creator.audience_size > 0
+            ? `${formatCompactCount(creator.audience_size)} followers`
+            : preview
+              ? "Add followers"
+              : "0 followers"}
+        </span>
+        {creator.location ? (
+          <span>{creator.location}</span>
+        ) : preview ? (
+          <span className="text-ink-subtle">Add location</span>
+        ) : null}
         {creator.languages.length ? (
           <span>{creator.languages.slice(0, 3).join(", ")}</span>
         ) : null}
@@ -86,10 +127,14 @@ export function CreatorPublicCard({
             </li>
           ))}
         </ul>
+      ) : preview ? (
+        <p className="mt-3 text-xs text-ink-subtle">Add specialties</p>
       ) : null}
 
-      {!compact && creator.audience_summary ? (
-        <p className="mt-3 text-sm text-support">{creator.audience_summary}</p>
+      {!compact && (creator.bio || creator.audience_summary) ? (
+        <p className="mt-3 line-clamp-3 text-sm text-support">
+          {creator.audience_summary || creator.bio}
+        </p>
       ) : null}
     </>
   );
