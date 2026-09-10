@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import type { UserRole } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { humanizeError } from "@/lib/toast";
 
 export type AuthActionState = {
   error?: string;
@@ -17,6 +18,13 @@ function asRole(value: FormDataEntryValue | null): UserRole | null {
 
 function trimString(value: FormDataEntryValue | null) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function mapAuthError(raw: string): string {
+  if (process.env.NODE_ENV === "development") {
+    console.error("[auth]", raw);
+  }
+  return humanizeError(raw);
 }
 
 function roleFromMetadata(value: unknown): UserRole | null {
@@ -83,7 +91,7 @@ export async function signUpAction(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: mapAuthError(error.message) };
   }
 
   if (!data.session) {
@@ -115,7 +123,7 @@ export async function signInAction(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: mapAuthError(error.message) };
   }
 
   const user = data.user;
@@ -220,7 +228,7 @@ export async function completeRoleRecoveryAction(
   });
 
   if (metaError) {
-    return { error: metaError.message };
+    return { error: mapAuthError(metaError.message) };
   }
 
   // Profile INSERT is intentionally not granted to clients (trigger-owned).
@@ -231,9 +239,12 @@ export async function completeRoleRecoveryAction(
   });
 
   if (rpcError) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[auth] ensure_own_profile", rpcError.message);
+    }
     return {
       error:
-        rpcError.message ||
+        humanizeError(rpcError.message) ||
         "Could not create your profile. Please try again.",
     };
   }

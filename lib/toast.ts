@@ -59,15 +59,36 @@ export function humanizeError(raw: string | null | undefined): string {
     lower.includes("jwt") ||
     lower.includes("not authenticated") ||
     lower.includes("invalid login") ||
-    lower.includes("invalid credentials")
+    lower.includes("invalid credentials") ||
+    lower.includes("invalid email or password")
   ) {
     return "Sign in failed. Check your email and password.";
   }
   if (lower.includes("email not confirmed")) {
     return "Confirm your email before signing in.";
   }
-  if (lower.includes("user already registered") || lower.includes("already been registered")) {
+  if (
+    lower.includes("user already registered") ||
+    lower.includes("already been registered") ||
+    lower.includes("already registered")
+  ) {
     return "An account with this email already exists. Try signing in.";
+  }
+  if (
+    lower.includes("password should be") ||
+    lower.includes("password is too weak") ||
+    lower.includes("weak password")
+  ) {
+    return "Choose a stronger password with at least 8 characters.";
+  }
+  if (lower.includes("rate limit") || lower.includes("too many requests")) {
+    return "Too many attempts. Please wait a moment and try again.";
+  }
+  if (
+    lower.includes("signup is disabled") ||
+    lower.includes("signups not allowed")
+  ) {
+    return "New sign-ups are temporarily unavailable.";
   }
   if (
     lower.includes("row-level security") ||

@@ -1,18 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 
+import { PasswordField } from "@/components/auth/password-field";
 import {
+  AuthField,
   AuthLayout,
-  Field,
+  AuthSubmitButton,
+  AuthTrustLine,
   FormMessage,
-  SubmitButton,
 } from "@/components/auth/ui";
 import {
   signInAction,
   type AuthActionState,
 } from "@/lib/auth/actions";
+import { appToast } from "@/lib/toast";
 
 const initialState: AuthActionState = {};
 
@@ -25,11 +28,25 @@ export function LoginForm({
     signInAction,
     initialState,
   );
+  const lastToast = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!state.error && !state.success) return;
+    const key = `${state.error ?? ""}|${state.success ?? ""}`;
+    if (lastToast.current === key) return;
+    lastToast.current = key;
+    if (state.error) {
+      appToast.error({ title: state.error, id: `login:${key}` });
+    } else if (state.success) {
+      appToast.success({ title: state.success, id: `login:${key}` });
+    }
+  }, [state]);
 
   return (
     <AuthLayout
-      title="Sign in"
-      subtitle="Access your brand or creator workspace."
+      mode="login"
+      title="Welcome back"
+      subtitle="Sign in to your brand or creator workspace."
       footer={
         <>
           No account yet?{" "}
@@ -42,26 +59,27 @@ export function LoginForm({
         </>
       }
     >
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} className="space-y-5">
         {nextPath ? (
           <input type="hidden" name="next" value={nextPath} />
         ) : null}
-        <Field
+        <AuthField
           label="Email"
           name="email"
           type="email"
           required
           autoComplete="email"
+          placeholder="you@company.com"
         />
-        <Field
+        <PasswordField
           label="Password"
           name="password"
-          type="password"
           required
           autoComplete="current-password"
         />
         <FormMessage error={state.error} success={state.success} />
-        <SubmitButton pending={pending}>Sign in</SubmitButton>
+        <AuthSubmitButton pending={pending}>Sign in</AuthSubmitButton>
+        <AuthTrustLine />
       </form>
     </AuthLayout>
   );
