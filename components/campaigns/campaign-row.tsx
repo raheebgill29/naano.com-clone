@@ -58,6 +58,9 @@ function formatDate(iso: string) {
   });
 }
 
+export const CAMPAIGN_TABLE_COLUMNS =
+  "lg:grid-cols-[minmax(0,4fr)_minmax(0,1.3fr)_minmax(0,1.6fr)_minmax(0,1.6fr)_minmax(0,2fr)_minmax(0,1.4fr)_minmax(0,2.4fr)]";
+
 export function CampaignListRow({
   item,
   nowMs,
@@ -70,161 +73,130 @@ export function CampaignListRow({
   const attention = campaignNeedsAttention(item);
   const progress = campaignProgressPercent(item.stats);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const muted = item.status === "completed" || item.status === "archived";
 
   return (
     <article
-      className={`rounded-[12px] border bg-surface transition-[border-color,box-shadow] duration-150 hover:border-line-strong ${
-        attention ? "border-warning/35" : "border-line"
+      className={`grid gap-x-4 gap-y-3 px-4 py-3.5 transition-colors hover:bg-page/40 lg:items-center ${CAMPAIGN_TABLE_COLUMNS} ${
+        muted ? "text-ink-muted" : ""
       }`}
     >
-      <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-stretch lg:gap-0">
-        {/* Main identity */}
-        <div className="min-w-0 flex-[1.4] lg:pr-5">
-          <div className="flex flex-wrap items-start gap-2">
-            {attention ? (
-              <span
-                className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-warning"
-                title="Needs attention"
-                aria-label="Needs attention"
-              />
-            ) : null}
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href={href}
-                  className="min-w-0 break-words text-base font-semibold tracking-tight text-ink hover:text-accent"
-                >
-                  {item.campaign_name}
-                </Link>
-                <span
-                  className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${campaignStatusBadgeClass(item.status)}`}
-                >
-                  {CAMPAIGN_STATUS_LABEL[item.status]}
-                </span>
-              </div>
-              <p className="mt-1 line-clamp-1 text-sm text-support">
-                {item.product_or_company}
-                {item.objective ? ` · ${item.objective}` : null}
-              </p>
-              <p className="mt-2 text-xs text-ink-subtle">
-                Target {formatDate(item.target_publish_date)} · Updated{" "}
-                {relativeUpdated(item.updated_at, nowMs)}
-              </p>
-              {next ? (
-                <p className="mt-2 text-xs font-semibold text-accent">
-                  Next: {next.label}
-                </p>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
-        {/* Metrics */}
-        <div className="min-w-0 flex-1 border-t border-line pt-4 lg:border-l lg:border-t-0 lg:px-5 lg:pt-0">
-          <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-            <Metric label="Invited" value={String(item.stats.invited)} />
-            <Metric label="Active" value={String(item.stats.active)} />
-            <Metric
-              label="Drafts"
-              value={String(item.stats.draftsAwaitingReview)}
-              emphasize={item.stats.draftsAwaitingReview > 0}
-            />
-            <Metric label="Done" value={String(item.stats.completed)} />
-          </dl>
-
-          {progress != null ? (
-            <div className="mt-3">
-              <div className="mb-1 flex items-center justify-between text-[11px] text-ink-subtle">
-                <span>Collaboration progress</span>
-                <span>{progress}%</span>
-              </div>
-              <div
-                className="h-1.5 overflow-hidden rounded-full bg-page"
-                role="progressbar"
-                aria-valuenow={progress}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label="Collaboration progress"
-              >
-                <div
-                  className="h-full rounded-full bg-accent transition-[width] duration-150"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          ) : null}
-
+      {/* Campaign identity */}
+      <div className="flex min-w-0 items-start gap-2.5">
+        <span
+          aria-hidden
+          className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${
+            attention ? "bg-accent" : "bg-transparent"
+          }`}
+        />
+        <div className="min-w-0 flex-1">
+          <Link
+            href={href}
+            className={`display block truncate text-[1.25rem] leading-tight hover:text-accent ${
+              muted ? "text-ink-muted" : "text-ink"
+            }`}
+          >
+            {item.campaign_name}
+          </Link>
+          <p className="mt-0.5 truncate text-[12px] text-support">
+            {item.product_or_company}
+            {item.objective ? ` · ${item.objective}` : null}
+          </p>
           <button
             type="button"
-            className="mt-3 text-xs font-semibold text-accent hover:text-accent-hover lg:hidden"
+            className="mt-1 text-[12px] font-semibold text-ink-muted hover:text-ink lg:hidden"
             aria-expanded={detailsOpen}
             onClick={() => setDetailsOpen((v) => !v)}
           >
-            {detailsOpen ? "Hide details" : "More details"}
+            {detailsOpen ? "Hide details" : "Details"}
           </button>
-
-          <div
-            className={`mt-3 space-y-1 text-xs text-support ${detailsOpen ? "block" : "hidden lg:block"}`}
-          >
-            <p>
-              Budget{" "}
-              <span className="font-semibold text-ink">
-                {formatPriceCents(item.budget_cents, item.currency)}
-              </span>
-              {item.stats.committedCents > 0 ? (
-                <>
-                  {" · "}Committed{" "}
-                  <span className="font-semibold text-ink">
-                    {formatPriceCents(item.stats.committedCents, item.currency)}
-                  </span>
-                </>
-              ) : null}
-            </p>
-            <p>
-              {item.stats.pending} pending · {item.post_count} post
-              {item.post_count === 1 ? "" : "s"} planned
-            </p>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex shrink-0 flex-col gap-2 border-t border-line pt-4 sm:flex-row sm:items-center lg:w-[13.5rem] lg:flex-col lg:items-stretch lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-          <CampaignPrimaryAction item={item} />
-          <div className="flex gap-2">
-            <Link
-              href={href}
-              className="inline-flex flex-1 items-center justify-center rounded-[12px] border border-line-strong bg-surface px-3 py-2.5 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-page"
-            >
-              Open
-            </Link>
-            <CampaignOverflowMenu item={item} />
-          </div>
         </div>
       </div>
-    </article>
-  );
-}
 
-function Metric({
-  label,
-  value,
-  emphasize,
-}: {
-  label: string;
-  value: string;
-  emphasize?: boolean;
-}) {
-  return (
-    <div>
-      <dt className="text-[11px] font-medium text-ink-subtle">
-        {label}
-      </dt>
-      <dd
-        className={`mt-0.5 text-sm font-semibold ${emphasize ? "text-warning" : "text-ink"}`}
-      >
-        {value}
-      </dd>
-    </div>
+      {/* Status */}
+      <div className={`${detailsOpen ? "block" : "hidden lg:block"}`}>
+        <span
+          className={`inline-flex rounded-[6px] px-1.5 py-0.5 text-[11px] font-semibold ${campaignStatusBadgeClass(item.status)}`}
+        >
+          {CAMPAIGN_STATUS_LABEL[item.status]}
+        </span>
+      </div>
+
+      {/* Roster */}
+      <div className={`tnum text-[12px] ${detailsOpen ? "block" : "hidden lg:block"}`}>
+        <p className="font-semibold text-ink">
+          {item.stats.invited} invited
+        </p>
+        <p className="text-support">
+          {item.stats.active} active · {item.stats.completed} done
+          {item.stats.draftsAwaitingReview > 0 ? (
+            <span className="text-accent">
+              {" "}· {item.stats.draftsAwaitingReview} to review
+            </span>
+          ) : null}
+        </p>
+      </div>
+
+      {/* Budget */}
+      <div className={`tnum text-[12px] ${detailsOpen ? "block" : "hidden lg:block"}`}>
+        <p className="font-semibold text-ink">
+          {formatPriceCents(item.budget_cents, item.currency)}
+        </p>
+        <p className="text-support">
+          {item.stats.committedCents > 0
+            ? `${formatPriceCents(item.stats.committedCents, item.currency)} committed`
+            : `${item.post_count} post${item.post_count === 1 ? "" : "s"} planned`}
+        </p>
+      </div>
+
+      {/* Progress */}
+      <div className={`${detailsOpen ? "block" : "hidden lg:block"}`}>
+        {progress != null ? (
+          <>
+            <div className="flex items-center justify-between text-[11px] text-ink-subtle">
+              <span>Complete</span>
+              <span className="tnum font-semibold text-ink">{progress}%</span>
+            </div>
+            <div
+              className="mt-1 h-1 overflow-hidden rounded-full bg-page"
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Collaboration progress"
+            >
+              <div
+                className="h-full rounded-full bg-ink"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </>
+        ) : (
+          <span className="text-[12px] text-ink-subtle">No creators yet</span>
+        )}
+      </div>
+
+      {/* Next milestone + dates */}
+      <div className={`text-[12px] ${detailsOpen ? "block" : "hidden lg:block"}`}>
+        <p className="font-semibold text-ink">
+          {next ? next.label : "—"}
+        </p>
+        <p className="tnum text-support">
+          Target {formatDate(item.target_publish_date)}
+        </p>
+        <p className="tnum text-ink-subtle">
+          Updated {relativeUpdated(item.updated_at, nowMs)}
+        </p>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 lg:justify-end">
+        <div className="min-w-0 flex-1 lg:max-w-[11rem]">
+          <CampaignPrimaryAction item={item} />
+        </div>
+        <CampaignOverflowMenu item={item} />
+      </div>
+    </article>
   );
 }
 
@@ -234,7 +206,7 @@ function CampaignPrimaryAction({ item }: { item: CampaignListItem }) {
     return (
       <Link
         href={`/brand/campaigns/${item.id}`}
-        className="inline-flex w-full items-center justify-center rounded-[12px] bg-accent px-3 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
+        className="inline-flex h-9 w-full items-center justify-center rounded-[8px] bg-ink px-3 text-[13px] font-semibold text-white hover:bg-ink-muted"
       >
         View campaign
       </Link>
@@ -245,7 +217,7 @@ function CampaignPrimaryAction({ item }: { item: CampaignListItem }) {
     return (
       <Link
         href={next.href}
-        className="inline-flex w-full items-center justify-center rounded-[12px] bg-accent px-3 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
+        className="inline-flex h-9 w-full items-center justify-center rounded-[8px] bg-ink px-3 text-[13px] font-semibold text-white hover:bg-ink-muted"
       >
         {next.label}
       </Link>
@@ -259,7 +231,7 @@ function CampaignPrimaryAction({ item }: { item: CampaignListItem }) {
         action={next.action}
         label={next.label}
         requiresConfirm={next.requiresConfirm}
-        className="inline-flex w-full items-center justify-center rounded-[12px] bg-accent px-3 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover disabled:opacity-60 [&>span]:text-white [&_span+span]:hidden"
+        className="inline-flex h-9 w-full items-center justify-center rounded-[8px] bg-ink px-3 text-[13px] font-semibold text-white hover:bg-ink-muted disabled:opacity-60 [&>span]:text-white [&>span]:text-[13px] [&_span+span]:hidden"
       />
     );
   }
@@ -369,7 +341,7 @@ function CampaignOverflowMenu({ item }: { item: CampaignListItem }) {
           event.stopPropagation();
           setOpen((v) => !v);
         }}
-        className="inline-flex h-[42px] w-10 items-center justify-center rounded-[12px] border border-line-strong bg-surface text-ink hover:bg-page"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-line bg-surface text-ink hover:border-line-strong hover:bg-page"
       >
         <span aria-hidden>⋯</span>
       </button>

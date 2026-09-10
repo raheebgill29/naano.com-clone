@@ -202,21 +202,24 @@ export default async function BrandDiscoverPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Discover creators"
+        eyebrow="Marketplace"
+        title={
+          preferredCampaignName
+            ? `Creators for ${preferredCampaignName}`
+            : "The creator marketplace"
+        }
         description={
           preferredCampaignName
-            ? `Inviting to “${preferredCampaignName}”.`
-            : total > 0
-              ? `${total} published creator${total === 1 ? "" : "s"}`
-              : "No published creators match these filters."
+            ? "Invitations from this page go to the selected campaign."
+            : "Published LinkedIn creators with fixed per-post pricing."
         }
         actions={
           <Link
             href="/brand/shortlist"
-            className="inline-flex items-center justify-center gap-2 rounded-[12px] border border-line-strong bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-page"
+            className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-line-strong bg-surface px-3.5 py-2 text-[13px] font-semibold text-ink transition-colors duration-150 hover:bg-page"
           >
-            View shortlist
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-page px-1.5 text-[11px] font-bold text-ink-muted">
+            Shortlist
+            <span className="tnum inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-ink px-1.5 text-[11px] font-bold text-white">
               {savedIds.size}
             </span>
           </Link>
@@ -280,16 +283,23 @@ export default async function BrandDiscoverPage({
       ) : (
         <>
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {creators.map((creator) => (
-              <li key={creator.id} className="min-w-0">
-                <MarketplaceCreatorCard
-                  creator={creator}
-                  saved={savedIds.has(creator.id)}
-                  campaigns={eligibleCampaigns ?? []}
-                  preferredCampaignId={preferredCampaignId}
-                />
-              </li>
-            ))}
+            {creators.map((creator, index) => {
+              const featured = index === 0 && page === 1 && !hasFilters;
+              return (
+                <li
+                  key={creator.id}
+                  className={`min-w-0 ${featured ? "sm:col-span-2 xl:col-span-3" : ""}`}
+                >
+                  <MarketplaceCreatorCard
+                    creator={creator}
+                    saved={savedIds.has(creator.id)}
+                    campaigns={eligibleCampaigns ?? []}
+                    preferredCampaignId={preferredCampaignId}
+                    featured={featured}
+                  />
+                </li>
+              );
+            })}
           </ul>
           {!savedOnly && totalPages > 1 ? (
             <nav

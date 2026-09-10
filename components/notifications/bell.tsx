@@ -9,6 +9,7 @@ import {
 } from "@/lib/notifications/actions";
 import { createClient } from "@/lib/supabase/client";
 import type { Notification } from "@/lib/supabase/database.types";
+import { BellIcon } from "@/components/workspace/icons";
 
 function sortNewest(items: Notification[]) {
   return [...items].sort(
@@ -120,7 +121,7 @@ export function NotificationsBell({
     <div className="relative" ref={rootRef}>
       <button
         type="button"
-        className="relative inline-flex h-10 w-10 items-center justify-center rounded-[12px] border border-line text-support transition-colors duration-150 hover:bg-page hover:text-ink"
+        className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-surface hover:text-ink"
         aria-label={
           visibleUnread > 0
             ? `Notifications, ${visibleUnread} unread`
@@ -131,12 +132,9 @@ export function NotificationsBell({
         aria-controls={menuId}
         onClick={() => setOpen((v) => !v)}
       >
-        <span
-          className="block h-4 w-4 rounded-full border-2 border-current"
-          aria-hidden
-        />
+        <BellIcon className="h-[18px] w-[18px]" />
         {visibleUnread > 0 ? (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white ring-2 ring-page">
             {visibleUnread > 99 ? "99+" : visibleUnread}
           </span>
         ) : null}
@@ -146,10 +144,13 @@ export function NotificationsBell({
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 z-30 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-[14px] border border-line bg-surface p-2 shadow-[var(--shadow)]"
+          className="absolute right-0 z-30 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-[12px] border border-line bg-surface p-2 shadow-[var(--shadow)]"
         >
           <div className="flex items-center justify-between gap-2 px-2 py-1.5">
-            <p className="text-sm font-semibold text-ink">Notifications</p>
+            <p className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <BellIcon className="h-4 w-4 text-ink-muted" />
+              Notifications
+            </p>
             {visibleUnread > 0 ? (
               <button
                 type="button"

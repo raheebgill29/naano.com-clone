@@ -54,20 +54,20 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-6 flex flex-col gap-3 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
           <p className="text-[12px] font-medium text-ink-subtle">{eyebrow}</p>
         ) : null}
         <h1
-          className={`text-[1.5rem] font-semibold tracking-tight text-ink sm:text-[1.625rem] sm:leading-tight ${
+          className={`display text-[2rem] text-ink sm:text-[2.375rem] ${
             eyebrow ? "mt-1" : ""
           }`}
         >
           {title}
         </h1>
         {description ? (
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-support">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-support">
             {description}
           </p>
         ) : null}
@@ -114,4 +114,63 @@ export function initials(name: string) {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
+}
+
+/** Editorial portrait frame; falls back to initials on a warm tint. */
+export function Portrait({
+  src,
+  name,
+  className = "h-12 w-12",
+  rounded = "rounded-[10px]",
+  textClass = "text-sm",
+}: {
+  src?: string | null;
+  name: string;
+  className?: string;
+  rounded?: string;
+  textClass?: string;
+}) {
+  return (
+    <span
+      className={`portrait relative inline-flex shrink-0 items-center justify-center overflow-hidden ${rounded} ${className}`}
+    >
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <span className={`font-semibold text-ink-muted ${textClass}`}>
+          {initials(name) || "C"}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/** Section heading with optional trailing action; editorial rule above. */
+export function SectionTitle({
+  title,
+  count,
+  action,
+  className = "",
+}: {
+  title: string;
+  count?: number;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`flex items-baseline justify-between gap-3 border-t border-ink/80 pt-3 ${className}`}
+    >
+      <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+        {title}
+        {typeof count === "number" ? (
+          <span className="ml-2 font-medium tracking-normal text-ink-subtle tnum">
+            {count}
+          </span>
+        ) : null}
+      </h2>
+      {action}
+    </div>
+  );
 }

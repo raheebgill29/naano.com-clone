@@ -2,6 +2,31 @@ import type { NavIcon } from "@/components/workspace/nav";
 
 const base = "h-5 w-5 shrink-0";
 
+export function BellIcon({ className = base }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d="M6.8 9.5a5.2 5.2 0 0 1 10.4 0c0 5.4 2.1 6.2 2.1 6.2H4.7s2.1-.8 2.1-6.2Z"
+        stroke="currentColor"
+        strokeWidth="1.65"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 18.5a2.3 2.3 0 0 0 4 0"
+        stroke="currentColor"
+        strokeWidth="1.65"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function NavGlyph({
   name,
   className = "",

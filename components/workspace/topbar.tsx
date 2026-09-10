@@ -17,11 +17,11 @@ export function WorkspaceTopbar({
   recipientProfileId: string;
 }) {
   return (
-    <header className="sticky top-0 z-20 flex h-12 items-center justify-between gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur-sm sm:px-6">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 bg-page/90 px-4 backdrop-blur-md sm:px-6 lg:justify-end lg:px-8">
       <div className="flex min-w-0 items-center gap-2.5">
         <button
           type="button"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-line text-ink transition-colors duration-150 hover:bg-page lg:hidden"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors duration-150 hover:bg-surface lg:hidden"
           aria-label="Open navigation"
           onClick={onOpenMenu}
         >
@@ -31,7 +31,7 @@ export function WorkspaceTopbar({
             <span className="block h-0.5 w-3.5 bg-current" />
           </span>
         </button>
-        <p className="truncate text-[13px] font-medium text-support lg:hidden">
+        <p className="truncate text-[13px] font-semibold text-ink lg:hidden">
           {workspaceLabel}
         </p>
       </div>

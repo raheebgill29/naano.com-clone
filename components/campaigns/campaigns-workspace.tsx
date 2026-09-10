@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 
-import { CampaignListRow } from "@/components/campaigns/campaign-row";
+import {
+  CAMPAIGN_TABLE_COLUMNS,
+  CampaignListRow,
+} from "@/components/campaigns/campaign-row";
 import { EmptyState } from "@/components/workspace/ui";
 import type { CampaignListItem } from "@/lib/campaigns/list-data";
-import {
-  CAMPAIGN_STATUS_LABEL,
-  campaignStatusBadgeClass,
-} from "@/lib/campaigns/status";
+import { CAMPAIGN_STATUS_LABEL } from "@/lib/campaigns/status";
 import type { CampaignStatus } from "@/lib/supabase/database.types";
 
 type StatusFilter = CampaignStatus | "open";
@@ -20,14 +20,6 @@ type DateFilter = "all" | "upcoming" | "overdue";
 function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
-
-const STATUS_KEYS: CampaignStatus[] = [
-  "draft",
-  "active",
-  "paused",
-  "completed",
-  "archived",
-];
 
 export function CampaignsWorkspace({
   items,
@@ -176,10 +168,14 @@ export function CampaignsWorkspace({
     );
   }
 
+  const selectClass =
+    "h-9 rounded-[8px] border border-line bg-surface px-2.5 text-[13px] font-medium text-ink hover:border-line-strong";
+
   return (
-    <div className="space-y-5">
-      <StatusSummary
+    <div className="space-y-4">
+      <StatusTabs
         counts={counts}
+        total={total}
         active={statusFilter}
         onSelect={(key) =>
           pushParams({
@@ -188,121 +184,96 @@ export function CampaignsWorkspace({
         }
       />
 
-      <div className="rounded-[12px] border border-line bg-surface p-3 sm:p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <form
-            onSubmit={onSearchSubmit}
-            className="relative min-w-0 flex-1"
-            role="search"
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <form
+          onSubmit={onSearchSubmit}
+          className="relative min-w-0 flex-1 sm:max-w-sm"
+          role="search"
+        >
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search campaigns"
+            aria-label="Search campaigns"
+            className="h-9 w-full rounded-[8px] border border-line bg-surface px-3 text-[13px] text-ink placeholder:text-ink-subtle hover:border-line-strong focus:border-ink"
+          />
+        </form>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="sr-only" htmlFor="campaign-date">
+            Target date
+          </label>
+          <select
+            id="campaign-date"
+            value={dateFilter}
+            onChange={(event) =>
+              pushParams({
+                date:
+                  event.target.value === "all"
+                    ? undefined
+                    : event.target.value,
+              })
+            }
+            className={selectClass}
           >
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search name, product, or objective"
-              aria-label="Search campaigns"
-              className="w-full rounded-[12px] border border-line bg-page px-3 py-2.5 text-sm text-ink placeholder:text-ink-subtle"
-            />
-          </form>
+            <option value="all">Any target date</option>
+            <option value="upcoming">Upcoming (30 days)</option>
+            <option value="overdue">Overdue</option>
+          </select>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="sr-only" htmlFor="campaign-status">
-              Status
-            </label>
-            <select
-              id="campaign-status"
-              value={statusFilter}
-              onChange={(event) =>
-                pushParams({
-                  status:
-                    event.target.value === "open"
-                      ? undefined
-                      : event.target.value,
-                })
-              }
-              className="rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
-            >
-              <option value="open">All open</option>
-              {STATUS_KEYS.map((key) => (
-                <option key={key} value={key}>
-                  {CAMPAIGN_STATUS_LABEL[key]}
-                </option>
-              ))}
-            </select>
-
-            <label className="sr-only" htmlFor="campaign-date">
-              Target date
-            </label>
-            <select
-              id="campaign-date"
-              value={dateFilter}
-              onChange={(event) =>
-                pushParams({
-                  date:
-                    event.target.value === "all"
-                      ? undefined
-                      : event.target.value,
-                })
-              }
-              className="rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
-            >
-              <option value="all">Any target date</option>
-              <option value="upcoming">Upcoming (30 days)</option>
-              <option value="overdue">Overdue</option>
-            </select>
-
-            <label className="sr-only" htmlFor="campaign-sort">
-              Sort
-            </label>
-            <select
-              id="campaign-sort"
-              value={sort}
-              onChange={(event) =>
-                pushParams({
-                  sort:
-                    event.target.value === "updated"
-                      ? undefined
-                      : event.target.value,
-                })
-              }
-              className="rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
-            >
-              <option value="updated">Recently updated</option>
-              <option value="newest">Newest</option>
-              <option value="target">Target date</option>
-              <option value="name">Name</option>
-            </select>
-          </div>
+          <label className="sr-only" htmlFor="campaign-sort">
+            Sort
+          </label>
+          <select
+            id="campaign-sort"
+            value={sort}
+            onChange={(event) =>
+              pushParams({
+                sort:
+                  event.target.value === "updated"
+                    ? undefined
+                    : event.target.value,
+              })
+            }
+            className={selectClass}
+          >
+            <option value="updated">Recently updated</option>
+            <option value="newest">Newest</option>
+            <option value="target">Target date</option>
+            <option value="name">Name</option>
+          </select>
+          <span className="tnum text-[12px] text-support">
+            {filtered.length === total
+              ? `${total} campaign${total === 1 ? "" : "s"}`
+              : `${filtered.length} of ${total}`}
+          </span>
         </div>
       </div>
 
       {chips.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {chips.map((chip) => (
             <button
               key={chip.key}
               type="button"
               onClick={chip.clear}
-              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold text-ink hover:bg-page"
+              className="inline-flex items-center gap-1.5 rounded-[6px] bg-ink px-2 py-1 text-[11px] font-semibold text-white hover:bg-ink-muted"
             >
               {chip.label}
-              <span aria-hidden>×</span>
+              <span aria-hidden className="text-white/70">
+                ×
+              </span>
             </button>
           ))}
           <Link
             href="/brand/campaigns"
-            className="text-xs font-semibold text-accent hover:text-accent-hover"
+            className="ml-1 text-[12px] font-semibold text-ink-muted hover:text-ink"
             onClick={() => setQuery("")}
           >
             Clear all
           </Link>
         </div>
       ) : null}
-
-      <p className="text-sm text-support">
-        {filtered.length === total
-          ? `${total} campaign${total === 1 ? "" : "s"}`
-          : `${filtered.length} of ${total} campaigns`}
-      </p>
 
       {total === 0 ? (
         <EmptyState
@@ -332,48 +303,82 @@ export function CampaignsWorkspace({
           }
         />
       ) : (
-        <ul className="space-y-3">
-          {filtered.map((item) => (
-            <li key={item.id}>
-              <CampaignListRow item={item} nowMs={loadedAtMs} />
-            </li>
-          ))}
-        </ul>
+        <div className="overflow-hidden rounded-[12px] border border-line bg-surface">
+          <div
+            className={`hidden gap-x-4 border-b border-line px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-subtle lg:grid ${CAMPAIGN_TABLE_COLUMNS}`}
+          >
+            <span className="pl-4">Campaign</span>
+            <span>Status</span>
+            <span>Roster</span>
+            <span>Budget</span>
+            <span>Progress</span>
+            <span>Next</span>
+            <span className="text-right">Actions</span>
+          </div>
+          <ul className="divide-y divide-line">
+            {filtered.map((item) => (
+              <li key={item.id}>
+                <CampaignListRow item={item} nowMs={loadedAtMs} />
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
 }
 
-function StatusSummary({
+const TAB_ORDER: Array<{ key: StatusFilter; label: string }> = [
+  { key: "open", label: "All open" },
+  { key: "active", label: "Active" },
+  { key: "paused", label: "Paused" },
+  { key: "draft", label: "Drafts" },
+  { key: "completed", label: "Completed" },
+  { key: "archived", label: "Archived" },
+];
+
+function StatusTabs({
   counts,
+  total,
   active,
   onSelect,
 }: {
   counts: Record<CampaignStatus, number>;
+  total: number;
   active: StatusFilter;
   onSelect: (key: StatusFilter) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {STATUS_KEYS.map((key) => {
-        const selected = active === key;
+    <div
+      role="tablist"
+      aria-label="Campaign status"
+      className="flex gap-1 overflow-x-auto border-b border-line"
+    >
+      {TAB_ORDER.map((tab) => {
+        const selected = active === tab.key;
+        const count =
+          tab.key === "open" ? total - counts.archived : counts[tab.key];
         return (
           <button
-            key={key}
+            key={tab.key}
             type="button"
-            onClick={() => onSelect(key)}
-            className={`inline-flex items-center gap-2 rounded-[12px] border px-3 py-2 text-left transition-colors duration-150 ${
+            role="tab"
+            aria-selected={selected}
+            onClick={() => onSelect(tab.key)}
+            className={`-mb-px inline-flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-[13px] font-semibold transition-colors ${
               selected
-                ? "border-accent/30 bg-accent-soft"
-                : "border-line bg-surface hover:bg-page"
+                ? "border-ink text-ink"
+                : "border-transparent text-ink-muted hover:text-ink"
             }`}
           >
+            {tab.label}
             <span
-              className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${campaignStatusBadgeClass(key)}`}
+              className={`tnum rounded-[5px] px-1.5 py-px text-[11px] ${
+                selected ? "bg-ink text-white" : "bg-page text-ink-subtle"
+              }`}
             >
-              {CAMPAIGN_STATUS_LABEL[key]}
+              {count}
             </span>
-            <span className="text-sm font-semibold text-ink">{counts[key]}</span>
           </button>
         );
       })}
@@ -383,13 +388,18 @@ function StatusSummary({
 
 export function CampaignsListSkeleton() {
   return (
-    <ul className="space-y-3">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <li
-          key={index}
-          className="h-36 animate-pulse rounded-[12px] border border-line bg-surface"
-        />
-      ))}
-    </ul>
+    <div className="overflow-hidden rounded-[12px] border border-line bg-surface">
+      <ul className="divide-y divide-line">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <li key={index} className="flex items-center gap-4 px-4 py-4">
+            <div className="h-6 w-56 animate-pulse rounded bg-page" />
+            <div className="hidden h-4 w-16 animate-pulse rounded bg-page lg:block" />
+            <div className="hidden h-4 w-24 animate-pulse rounded bg-page lg:block" />
+            <div className="hidden h-4 w-24 animate-pulse rounded bg-page lg:block" />
+            <div className="ml-auto h-9 w-32 animate-pulse rounded-[8px] bg-page" />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

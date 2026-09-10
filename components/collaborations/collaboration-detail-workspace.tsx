@@ -26,9 +26,12 @@ import {
 import type { CollaborationMessagePreview } from "@/lib/collaborations/detail-queries";
 import {
   STATUS_LABEL,
+  WORKFLOW_STAGES,
   collaborationStatusBadgeClass,
   isAwaitingOtherParty,
+  isRevisionLoop,
   nextActionForStatus,
+  workflowStageIndex,
 } from "@/lib/collaborations/status";
 import type {
   Campaign,
@@ -139,53 +142,61 @@ export function CollaborationDetailWorkspace({
   const primary = detailPrimaryAction(collab.status, role);
   const waiting = isAwaitingOtherParty(collab.status, role);
   const unread = messagePreview?.unread === true;
+  const compensation = formatPriceCents(
+    collab.price_cents * collab.post_count_snapshot,
+    collab.currency,
+  );
 
   return (
-    <div className="space-y-5">
-      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm">
-        <Link
-          href={listHref}
-          className="font-semibold text-accent hover:text-accent-hover"
-        >
+    <div className="space-y-6">
+      <nav aria-label="Breadcrumb" className="text-[12px] text-support">
+        <Link href={listHref} className="hover:text-ink">
           Collaborations
         </Link>
-        <span className="text-ink-subtle" aria-hidden>
+        <span className="mx-1.5" aria-hidden>
           /
         </span>
         {campaignHref ? (
-          <Link
-            href={campaignHref}
-            className="font-semibold text-accent hover:text-accent-hover"
-          >
+          <Link href={campaignHref} className="hover:text-ink">
             {campaign.campaign_name}
           </Link>
         ) : (
-          <span className="font-medium text-support">{campaign.campaign_name}</span>
+          <span>{campaign.campaign_name}</span>
         )}
+        <span className="mx-1.5" aria-hidden>
+          /
+        </span>
+        <span className="text-ink">{otherName}</span>
       </nav>
 
-      <header className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="break-words text-2xl font-semibold tracking-tight text-ink">
-                {campaign.campaign_name}
-              </h1>
-              <span
-                className={`inline-flex rounded-[8px] px-2.5 py-1 text-[11px] font-semibold ${collaborationStatusBadgeClass(collab.status)}`}
-              >
-                {STATUS_LABEL[collab.status]}
-              </span>
-            </div>
-            <div className="mt-2 flex items-center gap-2">
-              <ParticipantAvatar name={otherName} size="sm" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-ink">{otherName}</p>
-                <p className="truncate text-xs text-support">
-                  {campaign.deliverable_type}
-                  {otherMeta ? ` · ${otherMeta}` : null}
-                </p>
+      {/* Focused header */}
+      <header className="border-b border-line pb-5">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex min-w-0 items-start gap-4">
+            <ParticipantAvatar name={otherName} size="lg" />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`inline-flex rounded-[6px] px-1.5 py-0.5 text-[11px] font-semibold ${collaborationStatusBadgeClass(collab.status)}`}
+                >
+                  {STATUS_LABEL[collab.status]}
+                </span>
+                {unread ? (
+                  <Link
+                    href={messagesHref}
+                    className="text-[11px] font-semibold text-accent hover:text-accent-hover"
+                  >
+                    Unread messages
+                  </Link>
+                ) : null}
               </div>
+              <h1 className="display mt-1.5 break-words text-[2rem] leading-[1.05] text-ink sm:text-[2.5rem]">
+                {otherName}
+              </h1>
+              <p className="mt-1.5 text-[14px] text-ink-muted">
+                {campaign.campaign_name} · {campaign.deliverable_type}
+                {otherMeta ? ` · ${otherMeta}` : null}
+              </p>
             </div>
           </div>
 
@@ -193,7 +204,7 @@ export function CollaborationDetailWorkspace({
             {primary.kind === "scroll-action" ? (
               <a
                 href="#workflow-action"
-                className="inline-flex items-center justify-center rounded-[12px] bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
+                className="inline-flex h-10 items-center justify-center rounded-[10px] bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-muted"
               >
                 {primary.label}
               </a>
@@ -201,7 +212,7 @@ export function CollaborationDetailWorkspace({
             {primary.kind === "messages" || primary.kind === "none" ? (
               <Link
                 href={messagesHref}
-                className="inline-flex items-center justify-center rounded-[12px] bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
+                className="inline-flex h-10 items-center justify-center rounded-[10px] bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-muted"
               >
                 {primary.kind === "messages" ? primary.label : "Open conversation"}
                 {unread ? (
@@ -213,13 +224,11 @@ export function CollaborationDetailWorkspace({
             ) : (
               <Link
                 href={messagesHref}
-                className="inline-flex items-center justify-center rounded-[12px] border border-line-strong bg-surface px-3 py-2.5 text-sm font-semibold text-ink hover:bg-page"
+                className="inline-flex h-10 items-center justify-center rounded-[10px] border border-line bg-surface px-3.5 text-[13px] font-semibold text-ink hover:border-line-strong hover:bg-page"
               >
-                Open conversation
+                Conversation
                 {unread ? (
-                  <span className="ml-2 rounded-full bg-accent-soft px-1.5 py-0.5 text-[10px] text-accent">
-                    Unread
-                  </span>
+                  <span className="ml-2 h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
                 ) : null}
               </Link>
             )}
@@ -231,11 +240,12 @@ export function CollaborationDetailWorkspace({
           </div>
         </div>
 
-        <div className="mt-4 border-t border-line pt-4">
-          <CollaborationWorkflowProgress
+        <div className="mt-6">
+          <MilestoneTracker
             status={collab.status}
             updatedAt={collab.updated_at}
-            size="detail"
+            scheduledAt={collab.scheduled_publish_at}
+            targetDate={campaign.target_publish_date}
           />
         </div>
       </header>
@@ -244,58 +254,49 @@ export function CollaborationDetailWorkspace({
         <CampaignStatusCallout status={campaign.status as CampaignStatus} />
       ) : null}
 
-      <section
-        id="workflow-action"
-        className={`scroll-mt-24 rounded-[12px] border p-4 sm:p-5 ${
-          waiting
-            ? "border-line bg-page"
-            : readOnly
-              ? "border-line bg-surface"
-              : "border-accent/30 bg-accent-soft/30"
-        }`}
-      >
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <p className="text-[11px] font-medium text-ink-subtle">
-              Required action
-            </p>
-            <h2 className="mt-1 text-base font-semibold text-ink">
-              {actionPanelTitle(collab.status, role)}
-            </h2>
-            {primary.waitingLabel ? (
-              <p className="mt-1 text-sm font-medium text-support">
-                {primary.waitingLabel}
-              </p>
-            ) : (
-              <p className="mt-1 text-sm text-support">
-                {nextActionForStatus(collab.status, role)}
-              </p>
-            )}
-          </div>
-        </div>
+      <div className="grid gap-8 lg:grid-cols-12">
+        <div className="min-w-0 space-y-8 lg:col-span-8">
+          {/* Required action */}
+          <section id="workflow-action" className="scroll-mt-24">
+            <div className="flex items-baseline justify-between gap-3 border-t border-ink/80 pt-3">
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+                {waiting ? "Waiting" : readOnly ? "Status" : "Your action"}
+              </h2>
+              <span className="text-[12px] text-ink-subtle">
+                {primary.waitingLabel ?? nextActionForStatus(collab.status, role)}
+              </span>
+            </div>
+            <div
+              className={`mt-3 rounded-[12px] border p-4 sm:p-5 ${
+                waiting || readOnly
+                  ? "border-line bg-surface"
+                  : "border-ink/15 bg-surface"
+              }`}
+            >
+              <h3 className="text-[17px] font-semibold text-ink">
+                {actionPanelTitle(collab.status, role)}
+              </h3>
+              {!readOnly ? (
+                <div className="mt-4">
+                  <ActionSurface
+                    role={role}
+                    collab={collab}
+                    campaign={campaign}
+                    latestDraftId={latestDraft?.id}
+                  />
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-support">
+                  This collaboration is {STATUS_LABEL[collab.status].toLowerCase()}{" "}
+                  and read-only.
+                </p>
+              )}
+            </div>
+          </section>
 
-        {!readOnly ? (
-          <div className="mt-4">
-            <ActionSurface
-              role={role}
-              collab={collab}
-              campaign={campaign}
-              latestDraftId={latestDraft?.id}
-            />
-          </div>
-        ) : (
-          <p className="mt-3 text-sm text-support">
-            This collaboration is {STATUS_LABEL[collab.status].toLowerCase()} and
-            read-only.
-          </p>
-        )}
-      </section>
-
-      <div className="grid gap-5 lg:grid-cols-12">
-        <div className="min-w-0 space-y-5 lg:col-span-8">
           {collab.status === "revision_requested" && collab.latest_feedback ? (
             <section className="rounded-[12px] border border-warning/35 bg-warning-soft/40 p-4 sm:p-5">
-              <h2 className="text-base font-semibold text-ink">
+              <h2 className="text-[15px] font-semibold text-ink">
                 Revision feedback
               </h2>
               <p className="mt-2 whitespace-pre-wrap text-sm text-ink">
@@ -321,34 +322,61 @@ export function CollaborationDetailWorkspace({
 
           {collab.cancel_reason ? (
             <section className="rounded-[12px] border border-danger/25 bg-danger-soft/30 p-4 sm:p-5">
-              <h2 className="text-base font-semibold text-ink">
+              <h2 className="text-[15px] font-semibold text-ink">
                 Cancellation reason
               </h2>
               <p className="mt-2 text-sm text-support">{collab.cancel_reason}</p>
             </section>
           ) : null}
 
+          <ActivityTimeline events={events} actorNames={actorNames} />
+
           {canCancel ? (
-            <section
-              id="cancel-collab"
-              className="scroll-mt-24 rounded-[12px] border border-line bg-surface p-4 sm:p-5"
-            >
-              <h2 className="text-base font-semibold text-ink">
-                Cancel collaboration
-              </h2>
-              <p className="mt-1 text-sm text-support">
+            <section id="cancel-collab" className="scroll-mt-24">
+              <div className="border-t border-line pt-3">
+                <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-subtle">
+                  Cancel collaboration
+                </h2>
+              </div>
+              <p className="mt-2 text-[13px] text-support">
                 Cancelling is permanent. Provide a reason the creator can see.
               </p>
-              <div className="mt-4 max-w-lg">
+              <div className="mt-3 max-w-lg">
                 <CancelCollabForm campaignCreatorId={collab.id} />
               </div>
             </section>
           ) : null}
-
-          <ActivityTimeline events={events} actorNames={actorNames} />
         </div>
 
-        <aside className="min-w-0 space-y-4 lg:col-span-4">
+        <aside className="min-w-0 space-y-7 lg:col-span-4">
+          <section>
+            <div className="border-t border-ink/80 pt-3">
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+                Terms
+              </h2>
+            </div>
+            <dl className="tnum mt-2 divide-y divide-line text-[13px]">
+              <div className="flex justify-between gap-3 py-2">
+                <dt className="text-support">Compensation</dt>
+                <dd className="font-semibold text-ink">{compensation}</dd>
+              </div>
+              <div className="flex justify-between gap-3 py-2">
+                <dt className="text-support">Posts</dt>
+                <dd className="text-ink">{collab.post_count_snapshot}</dd>
+              </div>
+              <div className="flex justify-between gap-3 py-2">
+                <dt className="text-support">Target publish</dt>
+                <dd className="text-ink">{formatDate(campaign.target_publish_date)}</dd>
+              </div>
+              {collab.scheduled_publish_at ? (
+                <div className="flex justify-between gap-3 py-2">
+                  <dt className="text-support">Scheduled</dt>
+                  <dd className="text-ink">{formatDateTime(collab.scheduled_publish_at)}</dd>
+                </div>
+              ) : null}
+            </dl>
+          </section>
+
           <SummaryCard
             role={role}
             collab={collab}
@@ -368,6 +396,84 @@ export function CollaborationDetailWorkspace({
         </aside>
       </div>
     </div>
+  );
+}
+
+/** Full-width horizontal milestone tracker for the detail header. */
+function MilestoneTracker({
+  status,
+  updatedAt,
+  scheduledAt,
+  targetDate,
+}: {
+  status: CampaignCreator["status"];
+  updatedAt: string;
+  scheduledAt: string | null;
+  targetDate: string;
+}) {
+  if (status === "cancelled" || status === "declined" || status === "booking_pending") {
+    return (
+      <CollaborationWorkflowProgress
+        status={status}
+        updatedAt={updatedAt}
+        size="detail"
+      />
+    );
+  }
+
+  const current = workflowStageIndex(status);
+  const revision = isRevisionLoop(status);
+  const total = WORKFLOW_STAGES.length;
+
+  const stageHint = (index: number): string | null => {
+    const id = WORKFLOW_STAGES[index]?.id;
+    if (id === "scheduled" && scheduledAt) return formatDate(scheduledAt);
+    if (id === "published" && !scheduledAt) return `Target ${formatDate(targetDate)}`;
+    if (index === current) return `Updated ${formatDate(updatedAt)}`;
+    return null;
+  };
+
+  return (
+    <ol
+      className="grid gap-2"
+      style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}
+      aria-label="Collaboration milestones"
+    >
+      {WORKFLOW_STAGES.map((stage, index) => {
+        const reached = current >= index;
+        const isCurrent = current === index;
+        const warn = revision && isCurrent;
+        return (
+          <li key={stage.id} className="min-w-0">
+            <div
+              className={`h-1 rounded-full ${
+                warn
+                  ? "bg-warning"
+                  : reached
+                    ? "bg-ink"
+                    : "bg-line"
+              }`}
+              aria-hidden
+            />
+            <p
+              className={`mt-2 truncate text-[12px] font-semibold ${
+                isCurrent ? (warn ? "text-warning" : "text-ink") : reached ? "text-ink-muted" : "text-ink-subtle"
+              }`}
+              aria-current={isCurrent ? "step" : undefined}
+            >
+              {stage.label}
+            </p>
+            {stageHint(index) ? (
+              <p className="tnum truncate text-[11px] text-ink-subtle">
+                {stageHint(index)}
+              </p>
+            ) : warn && index === current ? (
+              <p className="truncate text-[11px] text-warning">Revision requested</p>
+            ) : null}
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -464,7 +570,7 @@ function LatestDraftCard({ draft }: { draft: ContentSubmission | null }) {
   if (!draft) {
     return (
       <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-        <h2 className="text-base font-semibold text-ink">Latest draft</h2>
+        <h2 className="text-[15px] font-semibold text-ink">Current deliverable</h2>
         <p className="mt-3 text-sm text-support">No drafts submitted yet.</p>
       </section>
     );
@@ -474,10 +580,11 @@ function LatestDraftCard({ draft }: { draft: ContentSubmission | null }) {
   const href = draft.asset_url ? safeExternalHref(draft.asset_url) : null;
 
   return (
-    <section className="rounded-[12px] border border-accent/25 bg-surface p-4 sm:p-5">
+    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-base font-semibold text-ink">
-          Latest draft · Version {draft.version}
+        <h2 className="text-[15px] font-semibold text-ink">
+          Current deliverable{" "}
+          <span className="text-ink-subtle">· v{draft.version}</span>
         </h2>
         {review ? (
           <span
@@ -523,8 +630,9 @@ function DraftHistory({ drafts }: { drafts: ContentSubmission[] }) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        <h2 className="text-base font-semibold text-ink">
-          Earlier versions ({drafts.length})
+        <h2 className="text-[15px] font-semibold text-ink">
+          Draft history{" "}
+          <span className="text-ink-subtle">· {drafts.length}</span>
         </h2>
         <span className="text-sm font-semibold text-accent">
           {open ? "Hide" : "Show"}
@@ -588,8 +696,8 @@ function PublishSection({
 
   return (
     <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-      <h2 className="text-base font-semibold text-ink">
-        Scheduling & publishing
+      <h2 className="text-[15px] font-semibold text-ink">
+        Scheduling &amp; publishing
       </h2>
       <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
         <div>
@@ -646,8 +754,12 @@ function ActivityTimeline({
   actorNames: Record<string, string>;
 }) {
   return (
-    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-      <h2 className="text-base font-semibold text-ink">Activity</h2>
+    <section>
+      <div className="border-t border-line pt-3">
+        <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+          Activity
+        </h2>
+      </div>
       {events.length === 0 ? (
         <p className="mt-3 text-sm text-support">No activity yet.</p>
       ) : (
@@ -661,7 +773,7 @@ function ActivityTimeline({
                 />
               ) : null}
               <span
-                className="relative mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 border-accent bg-surface"
+                className="relative mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 border-ink bg-surface"
                 aria-hidden
               />
               <div className="min-w-0 flex-1">
@@ -709,8 +821,10 @@ function SummaryCard({
   otherMeta: string | null;
 }) {
   return (
-    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-      <h2 className="text-sm font-semibold text-ink">Collaboration summary</h2>
+    <section className="border-t border-line pt-3">
+      <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+        Participants
+      </h2>
       <div className="mt-3 flex items-start gap-3">
         <ParticipantAvatar name={otherName} />
         <div className="min-w-0">
@@ -804,9 +918,11 @@ function MessagePreviewCard({
   otherName: string;
 }) {
   return (
-    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
+    <section className="border-t border-line pt-3">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-ink">Conversation</h2>
+        <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+          Conversation
+        </h2>
         {preview?.unread ? (
           <span className="rounded-[8px] bg-accent-soft px-2 py-0.5 text-[11px] font-semibold text-accent">
             Unread
@@ -841,8 +957,10 @@ function BriefCard({
   role: "brand" | "creator";
 }) {
   return (
-    <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-      <h2 className="text-sm font-semibold text-ink">Campaign brief</h2>
+    <section className="border-t border-line pt-3">
+      <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+        Campaign brief
+      </h2>
       <p className="mt-2 text-sm text-ink">{campaign.objective}</p>
       <p className="mt-3 whitespace-pre-wrap text-sm text-support">
         {campaign.description}

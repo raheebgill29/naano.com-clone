@@ -17,7 +17,7 @@ export function ParticipantAvatar({
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-accent-soft font-semibold text-accent ${sizeClass}`}
+      className={`portrait inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-ink-muted ${sizeClass}`}
       aria-hidden
     >
       {initials(name) || "?"}

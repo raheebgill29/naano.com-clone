@@ -18,10 +18,10 @@
   --shadow: 0 1px 2px rgb(18 21 28 / 6%), 0 10px 28px rgb(18 21 28 / 8%);
   --shadow-sm: 0 1px 2px rgb(18 21 28 / 5%);
 
-  /* Accent — restrained cobalt */
-  --accent: #1e4fd7;
-  --accent-hover: #183fb0;
-  --accent-soft: #eef2fb;
+  /* Accent — muted terracotta, paired with warm paper and deep ink */
+  --accent: #9a4f32;
+  --accent-hover: #7d3f28;
+  --accent-soft: #f5e9e2;
 
   /* Semantic */
   --danger: #b42318;
@@ -34,7 +34,7 @@
   /* Shape & motion */
   --radius: 12px;
   --radius-sm: 10px;
-  --focus: 0 0 0 3px rgb(30 79 215 / 22%);
+  --focus: 0 0 0 3px rgb(154 79 50 / 22%);
   --ease: 150ms ease;
   --sidebar-width: 14.5rem;
 
@@ -66,6 +66,29 @@
   --color-warning-soft: var(--warning-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Editorial display type — serif headlines, tight tracking */
+.display {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  font-weight: 400;
+}
+
+/* Thin rule used as section divider in editorial layouts */
+.rule {
+  border-top: 1px solid var(--line);
+}
+
+/* Portrait frame with subtle warm tint for missing images */
+.portrait {
+  background: linear-gradient(160deg, #ece7de, #f7f5f1);
+}
+
+/* Tabular numerals for metrics and money */
+.tnum {
+  font-variant-numeric: tabular-nums;
 }
 
 html {

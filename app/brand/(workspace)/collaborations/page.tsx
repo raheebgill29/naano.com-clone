@@ -39,11 +39,12 @@ export default async function BrandCollaborationsPage({
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Manage creator collaborations"
+        eyebrow="Delivery pipeline"
+        title="Collaborations"
         description={
           activeCount > 0
-            ? `${activeCount} active · Review drafts and keep campaigns on track.`
-            : "Review drafts, schedule posts, and close out campaign delivery."
+            ? `${activeCount} active · ownership, milestones, and delivery status.`
+            : "Track every creator engagement from acceptance to publication."
         }
       />
 

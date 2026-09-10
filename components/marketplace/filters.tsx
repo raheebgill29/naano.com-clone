@@ -304,162 +304,93 @@ function MarketplaceFiltersInner({
       saved,
   );
 
+  const selectClass =
+    "h-10 rounded-[10px] border border-line bg-surface px-3 text-[13px] font-medium text-ink transition-colors hover:border-line-strong";
+
   return (
     <div className="space-y-3">
-      <div className="rounded-[12px] border border-line bg-surface p-2.5 sm:p-3">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <form
-            onSubmit={onSearchSubmit}
-            className="relative min-w-0 flex-1"
-            role="search"
+      {/* Toolbar: prominent search + inline facets */}
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+        <form
+          onSubmit={onSearchSubmit}
+          className="relative min-w-0 flex-1"
+          role="search"
+        >
+          <span
+            className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-ink-subtle"
+            aria-hidden
           >
-            <span
-              className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-ink-subtle"
-              aria-hidden
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="6.25"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                />
-                <path
-                  d="m16 16 3.5 3.5"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
-            <input
-              name="q"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search name, headline, or topic"
-              aria-label="Search creators"
-              className="w-full rounded-[12px] border border-line bg-page py-2.5 pl-10 pr-10 text-sm text-ink placeholder:text-ink-subtle transition-[border-color] duration-150 hover:border-line-strong focus:border-accent"
-            />
-            {query ? (
-              <button
-                type="button"
-                aria-label="Clear search"
-                className="absolute inset-y-0 right-2 my-auto inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle hover:bg-surface hover:text-ink"
-                onClick={() => {
-                  setQuery("");
-                  onNavigate(buildParams({ q: undefined, page: undefined }));
-                }}
-              >
-                ×
-              </button>
-            ) : null}
-          </form>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="sr-only" htmlFor="marketplace-topic">
-              Specialty
-            </label>
-            <select
-              id="marketplace-topic"
-              value={topic}
-              onChange={(event) => onSelectChange("topic", event.target.value)}
-              className="min-w-[8.5rem] rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
-            >
-              <option value="">Specialty</option>
-              {topics.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-
-            <label className="sr-only" htmlFor="marketplace-language">
-              Language
-            </label>
-            <select
-              id="marketplace-language"
-              value={language}
-              onChange={(event) =>
-                onSelectChange("language", event.target.value)
-              }
-              className="min-w-[8.5rem] rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
-            >
-              <option value="">Language</option>
-              {languages.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.75" />
+              <path d="m16 16 3.5 3.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+            </svg>
+          </span>
+          <input
+            name="q"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search creators by name, positioning, or specialty"
+            aria-label="Search creators"
+            className="h-12 w-full rounded-[12px] border border-line bg-surface pl-11 pr-11 text-[15px] text-ink placeholder:text-ink-subtle transition-[border-color] duration-150 hover:border-line-strong focus:border-ink"
+          />
+          {query ? (
             <button
               type="button"
-              onClick={() => setMoreOpen(true)}
-              className={`inline-flex items-center gap-2 rounded-[12px] border px-3 py-2.5 text-sm font-semibold transition-colors duration-150 ${
-                moreActive
-                  ? "border-accent/30 bg-accent-soft text-accent"
-                  : "border-line bg-surface text-ink hover:bg-page"
-              }`}
-              aria-haspopup="dialog"
-              aria-expanded={moreOpen}
-            >
-              More filters
-              {moreActive ? (
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-[10px] font-bold text-white">
-                  !
-                </span>
-              ) : null}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {chips.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2">
-          {chips.map((chip) => (
-            <button
-              key={chip.key}
-              type="button"
+              aria-label="Clear search"
+              className="absolute inset-y-0 right-3 my-auto inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle hover:bg-page hover:text-ink"
               onClick={() => {
-                const overrides: Record<string, string | undefined> = {
-                  page: undefined,
-                };
-                for (const param of chip.clearParams) {
-                  overrides[param] = undefined;
-                }
-                if (chip.key === "q") setQuery("");
-                onNavigate(buildParams(overrides));
+                setQuery("");
+                onNavigate(buildParams({ q: undefined, page: undefined }));
               }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold text-ink transition-colors duration-150 hover:bg-page"
             >
-              {chip.label}
-              <span aria-hidden className="text-ink-subtle">
-                ×
-              </span>
-              <span className="sr-only">Remove filter</span>
+              ×
             </button>
-          ))}
-          <Link
-            href="/brand/discover"
-            className="text-xs font-semibold text-accent hover:text-accent-hover"
-          >
-            Clear all
-          </Link>
-        </div>
-      ) : null}
+          ) : null}
+        </form>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-support">
-          {resultSummary ?? "Browse creators"}
-        </p>
-        <label className="inline-flex items-center gap-2 text-sm text-support">
-          <span className="whitespace-nowrap">Sort by</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="sr-only" htmlFor="marketplace-topic">
+            Specialty
+          </label>
           <select
+            id="marketplace-topic"
+            value={topic}
+            onChange={(event) => onSelectChange("topic", event.target.value)}
+            className={`${selectClass} min-w-[8rem]`}
+          >
+            <option value="">All specialties</option>
+            {topics.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+
+          <label className="sr-only" htmlFor="marketplace-language">
+            Language
+          </label>
+          <select
+            id="marketplace-language"
+            value={language}
+            onChange={(event) => onSelectChange("language", event.target.value)}
+            className={`${selectClass} min-w-[7.5rem]`}
+          >
+            <option value="">Any language</option>
+            {languages.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+
+          <label className="sr-only" htmlFor="marketplace-sort">
+            Sort
+          </label>
+          <select
+            id="marketplace-sort"
             value={sort}
             onChange={(event) => onSortChange(event.target.value)}
-            aria-label="Sort creators"
-            className="rounded-[12px] border border-line bg-surface px-3 py-2 text-sm font-medium text-ink"
+            className={`${selectClass} min-w-[8rem]`}
           >
             {Object.entries(SORT_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
@@ -467,11 +398,69 @@ function MarketplaceFiltersInner({
               </option>
             ))}
           </select>
-        </label>
+
+          <button
+            type="button"
+            onClick={() => setMoreOpen(true)}
+            className={`inline-flex h-10 items-center gap-2 rounded-[10px] border px-3 text-[13px] font-semibold transition-colors duration-150 ${
+              moreActive
+                ? "border-ink bg-ink text-white"
+                : "border-line bg-surface text-ink hover:border-line-strong"
+            }`}
+            aria-haspopup="dialog"
+            aria-expanded={moreOpen}
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+            </svg>
+            Filters
+          </button>
+        </div>
       </div>
 
+      {/* Result summary + active chips */}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line pb-3">
+        <p className="tnum text-[13px] text-support">
+          {resultSummary ?? "Browse creators"}
+        </p>
+        {chips.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {chips.map((chip) => (
+              <button
+                key={chip.key}
+                type="button"
+                onClick={() => {
+                  const overrides: Record<string, string | undefined> = {
+                    page: undefined,
+                  };
+                  for (const param of chip.clearParams) {
+                    overrides[param] = undefined;
+                  }
+                  if (chip.key === "q") setQuery("");
+                  onNavigate(buildParams(overrides));
+                }}
+                className="inline-flex items-center gap-1.5 rounded-[6px] bg-ink px-2 py-1 text-[11px] font-semibold text-white transition-colors duration-150 hover:bg-ink-muted"
+              >
+                {chip.label}
+                <span aria-hidden className="text-white/70">
+                  ×
+                </span>
+                <span className="sr-only">Remove filter</span>
+              </button>
+            ))}
+            <Link
+              href="/brand/discover"
+              className="ml-1 text-[12px] font-semibold text-ink-muted hover:text-ink"
+            >
+              Clear all
+            </Link>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Slide-over filter panel */}
       {moreOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-50 flex justify-end">
           <button
             type="button"
             className="absolute inset-0 bg-ink/40"
@@ -483,11 +472,11 @@ function MarketplaceFiltersInner({
             role="dialog"
             aria-modal="true"
             aria-labelledby={sheetTitleId}
-            className="relative z-10 flex max-h-[90dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-[16px] border border-line bg-surface shadow-[var(--shadow)] sm:rounded-[16px]"
+            className="relative z-10 flex h-full w-full max-w-md flex-col border-l border-line bg-surface shadow-[var(--shadow)]"
           >
             <div className="flex items-center justify-between border-b border-line px-5 py-4">
-              <h2 id={sheetTitleId} className="text-base font-semibold text-ink">
-                More filters
+              <h2 id={sheetTitleId} className="display text-[1.5rem] text-ink">
+                Refine
               </h2>
               <button
                 type="button"
@@ -499,103 +488,112 @@ function MarketplaceFiltersInner({
               </button>
             </div>
             <form
-              className="overflow-y-auto px-5 py-4"
+              className="flex min-h-0 flex-1 flex-col"
               onSubmit={(event) => {
                 event.preventDefault();
                 applyMoreFilters(event.currentTarget);
               }}
             >
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-support">
-                    Min price (USD)
-                  </span>
-                  <input
-                    name="minPriceUnits"
-                    type="number"
-                    min={0}
-                    step="1"
-                    defaultValue={centsToUnits(minPrice)}
-                    placeholder="e.g. 200"
-                    className="w-full rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
-                  />
-                </label>
-                <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-support">
-                    Max price (USD)
-                  </span>
-                  <input
-                    name="maxPriceUnits"
-                    type="number"
-                    min={0}
-                    step="1"
-                    defaultValue={centsToUnits(maxPrice)}
-                    placeholder="e.g. 800"
-                    className="w-full rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
-                  />
-                </label>
-                <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-support">
-                    Min followers
-                  </span>
-                  <input
-                    name="minFollowers"
-                    type="number"
-                    min={0}
-                    defaultValue={minFollowers}
-                    className="w-full rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
-                  />
-                </label>
-                <label className="block space-y-1.5">
-                  <span className="text-xs font-medium text-support">
-                    Max followers
-                  </span>
-                  <input
-                    name="maxFollowers"
-                    type="number"
-                    min={0}
-                    defaultValue={maxFollowers}
-                    className="w-full rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
-                  />
-                </label>
-                <label className="block space-y-1.5 sm:col-span-2">
-                  <span className="text-xs font-medium text-support">
+              <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+                <fieldset>
+                  <legend className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink">
+                    Price per post (USD)
+                  </legend>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <label className="block space-y-1">
+                      <span className="text-[12px] text-support">Min</span>
+                      <input
+                        name="minPriceUnits"
+                        type="number"
+                        min={0}
+                        step="1"
+                        defaultValue={centsToUnits(minPrice)}
+                        placeholder="200"
+                        className="h-10 w-full rounded-[10px] border border-line bg-surface px-3 text-sm text-ink"
+                      />
+                    </label>
+                    <label className="block space-y-1">
+                      <span className="text-[12px] text-support">Max</span>
+                      <input
+                        name="maxPriceUnits"
+                        type="number"
+                        min={0}
+                        step="1"
+                        defaultValue={centsToUnits(maxPrice)}
+                        placeholder="1,500"
+                        className="h-10 w-full rounded-[10px] border border-line bg-surface px-3 text-sm text-ink"
+                      />
+                    </label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink">
+                    Followers
+                  </legend>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <label className="block space-y-1">
+                      <span className="text-[12px] text-support">Min</span>
+                      <input
+                        name="minFollowers"
+                        type="number"
+                        min={0}
+                        defaultValue={minFollowers}
+                        className="h-10 w-full rounded-[10px] border border-line bg-surface px-3 text-sm text-ink"
+                      />
+                    </label>
+                    <label className="block space-y-1">
+                      <span className="text-[12px] text-support">Max</span>
+                      <input
+                        name="maxFollowers"
+                        type="number"
+                        min={0}
+                        defaultValue={maxFollowers}
+                        className="h-10 w-full rounded-[10px] border border-line bg-surface px-3 text-sm text-ink"
+                      />
+                    </label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink">
                     Availability
-                  </span>
+                  </legend>
                   <select
                     name="availability"
                     defaultValue={availability}
-                    className="w-full rounded-[12px] border border-line bg-surface px-3 py-2.5 text-sm text-ink"
+                    className="mt-3 h-10 w-full rounded-[10px] border border-line bg-surface px-3 text-sm text-ink"
                   >
-                    <option value="available">Available</option>
+                    <option value="available">Available now</option>
                     <option value="unavailable">Unavailable</option>
-                    <option value="all">All</option>
+                    <option value="all">All creators</option>
                   </select>
-                </label>
-                <label className="inline-flex items-center gap-2 text-sm text-ink sm:col-span-2">
+                </fieldset>
+
+                <label className="flex items-center gap-2.5 text-sm text-ink">
                   <input
                     type="checkbox"
                     name="saved"
                     value="1"
                     defaultChecked={saved}
-                    className="rounded border-line"
+                    className="h-4 w-4 rounded border-line accent-[var(--ink)]"
                   />
-                  Saved creators only
+                  Shortlisted creators only
                 </label>
               </div>
-              <div className="mt-5 flex justify-end gap-2 border-t border-line pt-4">
+              <div className="flex justify-end gap-2 border-t border-line px-5 py-4">
                 <button
                   type="button"
                   onClick={() => setMoreOpen(false)}
-                  className="rounded-[12px] border border-line px-4 py-2.5 text-sm font-semibold text-ink hover:bg-page"
+                  className="rounded-[10px] border border-line px-4 py-2.5 text-sm font-semibold text-ink hover:bg-page"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-[12px] bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
+                  className="rounded-[10px] bg-ink px-4 py-2.5 text-sm font-semibold text-white hover:bg-ink-muted"
                 >
-                  Apply filters
+                  Show results
                 </button>
               </div>
             </form>

@@ -21,7 +21,6 @@ import {
   nextActionLabel,
   primaryAction,
   targetOrScheduledMs,
-  urgencyBorderTone,
   type CollaborationListItem,
 } from "@/lib/collaborations/list-data";
 import {
@@ -51,6 +50,9 @@ function formatDate(iso: string) {
   });
 }
 
+export const COLLAB_TABLE_COLUMNS =
+  "lg:grid-cols-[minmax(0,3.6fr)_minmax(0,3.2fr)_minmax(0,1.8fr)_minmax(0,1.8fr)_minmax(0,1.4fr)_minmax(0,2.2fr)]";
+
 export function CollaborationListRow({
   item,
   nowMs,
@@ -62,7 +64,6 @@ export function CollaborationListRow({
   const chatHref = messagesHref(item.role, item.id);
   const action = primaryAction(item);
   const attention = itemNeedsAttention(item);
-  const tone = urgencyBorderTone(item, nowMs);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const dateMs = targetOrScheduledMs(item);
   const dateLabel = item.scheduled_publish_at
@@ -76,147 +77,127 @@ export function CollaborationListRow({
     item.price_cents * item.post_count_snapshot,
     item.currency,
   );
+  const owner = action.waitingLabel
+    ? action.waitingLabel
+    : attention
+      ? "You"
+      : item.status === "completed"
+        ? "Done"
+        : item.status === "cancelled" || item.status === "declined"
+          ? "—"
+          : "You";
+  const closed =
+    item.status === "completed" ||
+    item.status === "cancelled" ||
+    item.status === "declined";
 
   return (
     <article
-      className={`rounded-[12px] border bg-surface transition-[border-color,box-shadow] duration-150 hover:border-line-strong ${
-        tone === "warning"
-          ? "border-warning/40"
-          : tone === "accent"
-            ? "border-accent/35"
-            : "border-line"
+      className={`grid gap-x-4 gap-y-3 px-4 py-3.5 transition-colors hover:bg-page/40 lg:items-center ${COLLAB_TABLE_COLUMNS} ${
+        closed ? "text-ink-muted" : ""
       }`}
     >
-      <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-stretch lg:gap-0">
-        <div className="min-w-0 flex-[1.5] lg:pr-5">
-          <div className="flex items-start gap-3">
-            {attention ? (
-              <span
-                className="mt-2 h-2 w-2 shrink-0 rounded-full bg-warning"
-                title="Needs attention"
-                aria-label="Needs attention"
-              />
+      {/* Participant + campaign */}
+      <div className="flex min-w-0 items-start gap-3">
+        <span
+          aria-hidden
+          className={`mt-3 h-1.5 w-1.5 shrink-0 rounded-full ${
+            attention ? "bg-accent" : "bg-transparent"
+          }`}
+        />
+        <ParticipantAvatar name={item.participantName} size="lg" />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <Link
+              href={href}
+              className={`display truncate text-[1.2rem] leading-tight hover:text-accent ${
+                closed ? "text-ink-muted" : "text-ink"
+              }`}
+            >
+              {item.participantName}
+            </Link>
+            {item.unread ? (
+              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-accent" title="Unread messages" aria-label="Unread messages" />
             ) : null}
-            <ParticipantAvatar name={item.participantName} size="md" />
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href={href}
-                  className="min-w-0 break-words text-base font-semibold tracking-tight text-ink hover:text-accent"
-                >
-                  {item.campaignName}
-                </Link>
-                <span
-                  className={`inline-flex shrink-0 rounded-[8px] px-2 py-0.5 text-[11px] font-semibold ${collaborationStatusBadgeClass(item.status)}`}
-                >
-                  {STATUS_LABEL[item.status]}
-                </span>
-                {item.unread ? (
-                  <span className="inline-flex shrink-0 items-center rounded-[8px] bg-accent-soft px-2 py-0.5 text-[11px] font-semibold text-accent">
-                    Unread
-                  </span>
-                ) : null}
-                {overdue ? (
-                  <span className="inline-flex shrink-0 rounded-[8px] bg-warning-soft px-2 py-0.5 text-[11px] font-semibold text-warning">
-                    Overdue
-                  </span>
-                ) : upcoming && attention ? (
-                  <span className="inline-flex shrink-0 rounded-[8px] bg-page px-2 py-0.5 text-[11px] font-semibold text-support">
-                    Due soon
-                  </span>
-                ) : null}
-              </div>
-
-              <p className="mt-1 line-clamp-1 text-sm text-support">
-                <span className="font-medium text-ink">{item.participantName}</span>
-                {item.participantMeta ? ` · ${item.participantMeta}` : null}
-              </p>
-
-              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-3">
-                <div className="min-w-0">
-                  <dt className="text-[11px] font-medium text-ink-subtle">
-                    Deliverable
-                  </dt>
-                  <dd className="mt-0.5 truncate font-medium text-ink">
-                    {item.deliverableType}
-                  </dd>
-                </div>
-                <div className="min-w-0">
-                  <dt className="text-[11px] font-medium text-ink-subtle">
-                    Compensation
-                  </dt>
-                  <dd className="mt-0.5 truncate font-semibold text-ink">
-                    {compensation}
-                  </dd>
-                </div>
-                <div className="min-w-0 col-span-2 sm:col-span-1">
-                  <dt className="text-[11px] font-medium text-ink-subtle">
-                    {dateLabel ?? "Date"}
-                  </dt>
-                  <dd
-                    className={`mt-0.5 truncate font-medium ${
-                      overdue ? "text-warning" : "text-ink"
-                    }`}
-                  >
-                    {dateMs != null ? formatDate(new Date(dateMs).toISOString()) : "—"}
-                  </dd>
-                </div>
-              </dl>
-
-              <p className="mt-3 text-xs text-ink-subtle">
-                Updated {relativeUpdated(item.updated_at, nowMs)} ·{" "}
-                {latestWorkflowUpdate(item)}
-              </p>
-
-              <p className="mt-2 text-xs font-semibold text-accent">
-                Next: {nextActionLabel(item)}
-              </p>
-
-              {action.waitingLabel ? (
-                <p className="mt-1 text-xs font-medium text-support">
-                  {action.waitingLabel}
-                </p>
-              ) : null}
-            </div>
           </div>
-        </div>
-
-        <div className="min-w-0 flex-[1.15] border-t border-line pt-4 lg:border-l lg:border-t-0 lg:px-5 lg:pt-0">
+          <p className="mt-0.5 truncate text-[12px] text-support">
+            {item.campaignName}
+            {item.participantMeta ? ` · ${item.participantMeta}` : null}
+          </p>
           <button
             type="button"
-            className="text-xs font-semibold text-accent hover:text-accent-hover lg:hidden"
+            className="mt-1 text-[12px] font-semibold text-ink-muted hover:text-ink lg:hidden"
             aria-expanded={detailsOpen}
             onClick={() => setDetailsOpen((v) => !v)}
           >
-            {detailsOpen ? "Hide progress" : "Show progress"}
+            {detailsOpen ? "Hide details" : "Details"}
           </button>
-          <div className={`mt-2 ${detailsOpen ? "block" : "hidden lg:block"}`}>
-            <CollaborationWorkflowProgress status={item.status} />
-          </div>
         </div>
+      </div>
 
-        <div className="flex shrink-0 flex-col gap-2 border-t border-line pt-4 sm:flex-row sm:items-center lg:w-[13.5rem] lg:flex-col lg:items-stretch lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-          <Link
-            href={action.href}
-            className="inline-flex w-full items-center justify-center rounded-[12px] bg-accent px-3 py-2.5 text-center text-sm font-semibold text-white hover:bg-accent-hover"
+      {/* Stage */}
+      <div className={`min-w-0 ${detailsOpen ? "block" : "hidden lg:block"}`}>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span
+            className={`inline-flex rounded-[6px] px-1.5 py-0.5 text-[11px] font-semibold ${collaborationStatusBadgeClass(item.status)}`}
           >
-            {action.label}
-          </Link>
-          <div className="flex gap-2">
-            <Link
-              href={href}
-              className="inline-flex flex-1 items-center justify-center rounded-[12px] border border-line-strong bg-surface px-3 py-2.5 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-page"
-            >
-              Open
-            </Link>
-            <CollaborationOverflowMenu
-              detailHref={href}
-              messagesHref={chatHref}
-              unread={item.unread}
-              primaryIsMessages={action.href === chatHref}
-            />
-          </div>
+            {STATUS_LABEL[item.status]}
+          </span>
+          {overdue ? (
+            <span className="text-[11px] font-semibold text-warning">Overdue</span>
+          ) : upcoming && attention ? (
+            <span className="text-[11px] font-semibold text-support">Due soon</span>
+          ) : null}
         </div>
+        <div className="mt-1.5">
+          <CollaborationWorkflowProgress status={item.status} />
+        </div>
+      </div>
+
+      {/* Owner of next action */}
+      <div className={`text-[12px] ${detailsOpen ? "block" : "hidden lg:block"}`}>
+        <p className={`font-semibold ${attention ? "text-accent" : "text-ink"}`}>
+          {owner}
+        </p>
+        <p className="mt-0.5 line-clamp-2 leading-4 text-support">
+          {nextActionLabel(item)}
+        </p>
+      </div>
+
+      {/* Deliverable + compensation + date */}
+      <div className={`tnum text-[12px] ${detailsOpen ? "block" : "hidden lg:block"}`}>
+        <p className="truncate font-semibold text-ink">{item.deliverableType}</p>
+        <p className="text-support">{compensation}</p>
+        <p className={overdue ? "text-warning" : "text-ink-subtle"}>
+          {dateLabel ? `${dateLabel} ` : ""}
+          {dateMs != null ? formatDate(new Date(dateMs).toISOString()) : "—"}
+        </p>
+      </div>
+
+      {/* Last update */}
+      <div className={`tnum text-[12px] ${detailsOpen ? "block" : "hidden lg:block"}`}>
+        <p className="text-ink">{relativeUpdated(item.updated_at, nowMs)}</p>
+        <p className="text-support">{latestWorkflowUpdate(item)}</p>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 lg:justify-end">
+        <Link
+          href={action.href}
+          className={`inline-flex h-9 min-w-0 flex-1 items-center justify-center rounded-[8px] px-3 text-center text-[13px] font-semibold transition-colors lg:max-w-[11rem] ${
+            attention
+              ? "bg-ink text-white hover:bg-ink-muted"
+              : "border border-line bg-surface text-ink hover:border-line-strong hover:bg-page"
+          }`}
+        >
+          {action.label}
+        </Link>
+        <CollaborationOverflowMenu
+          detailHref={href}
+          messagesHref={chatHref}
+          unread={item.unread}
+          primaryIsMessages={action.href === chatHref}
+        />
       </div>
     </article>
   );
@@ -266,7 +247,7 @@ function CollaborationOverflowMenu({
           event.stopPropagation();
           setOpen((v) => !v);
         }}
-        className="inline-flex h-[42px] w-10 items-center justify-center rounded-[12px] border border-line-strong bg-surface text-ink hover:bg-page"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-line bg-surface text-ink hover:border-line-strong hover:bg-page"
       >
         <span aria-hidden>⋯</span>
       </button>

@@ -131,13 +131,26 @@ export function SaveCreatorButton({
       onClick={onToggle}
       disabled={pending}
       aria-pressed={saved}
-      className={`inline-flex items-center justify-center rounded-[12px] px-3 py-2 text-sm font-semibold transition-colors duration-150 disabled:opacity-60 ${
+      className={`inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border px-3.5 text-[13px] font-semibold transition-colors duration-150 disabled:opacity-60 ${
         saved
-          ? "border border-line-strong bg-surface text-ink hover:bg-page"
-          : "bg-accent text-white hover:bg-accent-hover"
+          ? "border-accent/30 bg-accent-soft text-accent hover:bg-accent-soft/70"
+          : "border-line-strong bg-surface text-ink hover:bg-page"
       }`}
     >
-      {pending ? "Saving…" : saved ? "Remove from shortlist" : "Save creator"}
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill={saved ? "currentColor" : "none"}
+        aria-hidden
+      >
+        <path
+          d="M12 20s-6.5-4.1-6.5-9.1A3.9 3.9 0 0 1 12 8.2a3.9 3.9 0 0 1 6.5 2.7C18.5 15.9 12 20 12 20Z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {pending ? "Saving…" : saved ? "Shortlisted" : "Shortlist"}
     </button>
   );
 }

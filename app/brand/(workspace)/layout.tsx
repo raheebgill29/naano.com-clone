@@ -34,6 +34,7 @@ export default async function BrandWorkspaceLayout({
       notifications={items}
       unreadNotifications={unreadCount}
       recipientProfileId={userId}
+      wide
     >
       {children}
     </WorkspaceShell>

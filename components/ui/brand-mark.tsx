@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/** Purposeful Naano mark — connected arcs, not a letter in a blue square. */
+/** Purposeful Naano mark — connected arcs on deep editorial ink. */
 export function BrandMark({
   className = "h-8 w-8",
   title = "Naano",
@@ -18,7 +18,7 @@ export function BrandMark({
       role={title ? "img" : undefined}
     >
       {title ? <title>{title}</title> : null}
-      <rect width="32" height="32" rx="8" fill="#1e4fd7" />
+      <rect width="32" height="32" rx="8" fill="#12151c" />
       <path
         d="M9 21.5c0-5.2 3.4-9 8.2-9 1.9 0 3.5.5 4.8 1.4"
         stroke="#fff"
@@ -27,12 +27,12 @@ export function BrandMark({
       />
       <path
         d="M23 10.5c0 5.2-3.4 9-8.2 9-1.9 0-3.5-.5-4.8-1.4"
-        stroke="#c5d4f8"
+        stroke="#d7aa93"
         strokeWidth="2.1"
         strokeLinecap="round"
       />
       <circle cx="11.2" cy="12.2" r="1.55" fill="#fff" />
-      <circle cx="20.8" cy="19.8" r="1.55" fill="#c5d4f8" />
+      <circle cx="20.8" cy="19.8" r="1.55" fill="#d7aa93" />
     </svg>
   );
 }

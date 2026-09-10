@@ -35,15 +35,16 @@ export default async function BrandCampaignsPage({
   return (
     <div className="space-y-5">
       <PageHeader
+        eyebrow="Operations"
         title="Campaigns"
         description={
           total > 0
-            ? `${total} campaign${total === 1 ? "" : "s"} across draft, active, and completed work.`
-            : "Create briefs, invite creators, and manage campaign lifecycle."
+            ? `${total} brief${total === 1 ? "" : "s"} · lifecycle, roster, budget, and next milestone.`
+            : "Write a brief, invite creators, and run the campaign from one place."
         }
         actions={
           <PrimaryLink href="/brand/campaigns/new" className="!w-auto">
-            Create campaign
+            New campaign
           </PrimaryLink>
         }
       />

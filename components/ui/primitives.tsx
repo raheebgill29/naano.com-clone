@@ -113,7 +113,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
             width="32"
             height="32"
             rx="8"
-            fill={light ? "rgba(255,255,255,0.14)" : "#1e4fd7"}
+            fill={light ? "rgba(255,255,255,0.14)" : "#12151c"}
           />
           <path
             d="M9 21.5c0-5.2 3.4-9 8.2-9 1.9 0 3.5.5 4.8 1.4"
@@ -123,7 +123,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
           />
           <path
             d="M23 10.5c0 5.2-3.4 9-8.2 9-1.9 0-3.5-.5-4.8-1.4"
-            stroke={light ? "rgba(255,255,255,0.55)" : "#c5d4f8"}
+            stroke={light ? "rgba(255,255,255,0.55)" : "#d7aa93"}
             strokeWidth="2.1"
             strokeLinecap="round"
           />

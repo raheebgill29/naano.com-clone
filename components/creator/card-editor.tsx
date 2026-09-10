@@ -14,7 +14,12 @@ import {
 import { CreatorPublicCard } from "@/components/marketplace/creator-card";
 import { TagInput, tagsToCsv } from "@/components/ui/tag-input";
 import { FormMessage } from "@/components/ui/primitives";
-import { initials } from "@/components/workspace/ui";
+import {
+  Portrait,
+  formatCompactCount,
+  formatPriceCents,
+  initials,
+} from "@/components/workspace/ui";
 import {
   publishCreatorCard,
   saveCreatorCardDraft,
@@ -28,8 +33,6 @@ import type { Creator, Profile } from "@/lib/supabase/database.types";
 const initialState: CreatorCardActionState = {};
 
 const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD"] as const;
-
-type SectionId = "profile" | "audience" | "offer";
 
 function centsToMajor(cents: number | null): string {
   if (cents == null || !Number.isFinite(cents)) return "";
@@ -129,7 +132,6 @@ export function CreatorCardEditor({
   const [availability, setAvailability] = useState(initialSnapshot.availability);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [overflowOpen, setOverflowOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<SectionId>("profile");
 
   const overflowRef = useRef<HTMLDivElement>(null);
   const lastToast = useRef<string | null>(null);
@@ -253,24 +255,6 @@ export function CreatorCardEditor({
     };
   }, [overflowOpen]);
 
-  useEffect(() => {
-    const sections: SectionId[] = ["profile", "audience", "offer"];
-    const observers: IntersectionObserver[] = [];
-    for (const id of sections) {
-      const el = document.getElementById(`card-section-${id}`);
-      if (!el) continue;
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (entry?.isIntersecting) setActiveSection(id);
-        },
-        { rootMargin: "-30% 0px -55% 0px", threshold: 0.01 },
-      );
-      obs.observe(el);
-      observers.push(obs);
-    }
-    return () => observers.forEach((o) => o.disconnect());
-  }, []);
-
   function focusFirstInvalid() {
     if (!fullName.trim()) {
       nameRef.current?.focus();
@@ -378,24 +362,24 @@ export function CreatorCardEditor({
   );
 
   return (
-    <div className="space-y-5 pb-28 lg:pb-8">
-      <header className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.06em] text-ink-subtle">
-          My card
+    <div className="space-y-6 pb-28 lg:pb-8">
+      <header className="border-b border-line pb-5">
+        <p className="text-[12px] font-medium text-ink-subtle">
+          Marketplace profile
         </p>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-ink">
-                Build your creator profile
+              <h1 className="display text-[2rem] text-ink sm:text-[2.375rem]">
+                Shape how brands see you.
               </h1>
               <StatusBadge label={statusLabel} kind={statusLabel} />
             </div>
-            <p className="mt-1 max-w-2xl text-sm text-support">
-              This information controls how brands discover you in the
-              marketplace.
+            <p className="mt-2 max-w-2xl text-sm text-support">
+              Edit your positioning, audience, and commercial offer alongside
+              the live marketplace preview.
             </p>
-            <div className="mt-3 flex items-center gap-3">
+            <div className="mt-4 flex items-center gap-3">
               <div
                 className="h-1.5 w-32 overflow-hidden rounded-full bg-page"
                 role="progressbar"
@@ -442,34 +426,48 @@ export function CreatorCardEditor({
             ) : null}
           </div>
         </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+          <Portrait
+            src={profile.avatar_url}
+            name={fullName}
+            className="h-14 w-14"
+            rounded="rounded-[9px]"
+          />
+          <div className="min-w-0">
+            <p className="display truncate text-[1.35rem] text-ink">
+              {fullName || "Your name"}
+            </p>
+            <p className="max-w-xl truncate text-[12px] text-support">
+              {headline || "Your professional positioning"}
+            </p>
+          </div>
+          <dl className="tnum ml-auto hidden items-center gap-6 sm:flex">
+            <div>
+              <dt className="text-[11px] text-ink-subtle">Audience</dt>
+              <dd className="text-[13px] font-semibold text-ink">
+                {audienceSize == null
+                  ? "—"
+                  : formatCompactCount(audienceSize)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-ink-subtle">Availability</dt>
+              <dd className="text-[13px] font-semibold text-ink">
+                {availability === "available" ? "Available" : "Unavailable"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-ink-subtle">Per post</dt>
+              <dd className="text-[13px] font-semibold text-ink">
+                {formatPriceCents(priceCents, currency)}
+              </dd>
+            </div>
+          </dl>
+        </div>
       </header>
 
-      <nav
-        aria-label="Card sections"
-        className="sticky top-0 z-10 -mx-1 flex gap-2 overflow-x-auto bg-page/95 px-1 py-2 backdrop-blur-sm lg:static lg:bg-transparent lg:backdrop-blur-none"
-      >
-        {(
-          [
-            ["profile", "Profile"],
-            ["audience", "Audience"],
-            ["offer", "Offer"],
-          ] as const
-        ).map(([id, label]) => (
-          <a
-            key={id}
-            href={`#card-section-${id}`}
-            className={`shrink-0 rounded-[12px] px-3 py-2 text-sm font-semibold transition-colors ${
-              activeSection === id
-                ? "bg-accent text-white"
-                : "border border-line bg-surface text-ink hover:bg-page"
-            }`}
-          >
-            {label}
-          </a>
-        ))}
-      </nav>
-
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.78fr)] xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-5">
           <section
             id="card-section-profile"
@@ -708,12 +706,14 @@ export function CreatorCardEditor({
           id="brand-preview-panel"
           className="hidden min-w-0 space-y-4 lg:block"
         >
-          <div className="sticky top-20 space-y-4">
+          <div className="sticky top-16 space-y-4">
             <div>
-              <h2 className="text-[15px] font-semibold text-ink">Marketplace preview</h2>
-              <p className="mt-1 text-sm text-support">
-                Public listing as brands see it.
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-subtle">
+                Live preview
               </p>
+              <h2 className="display mt-1 text-[1.5rem] text-ink">
+                Your marketplace profile
+              </h2>
             </div>
             {previewCard}
             <ReadinessCard ready={gate.ready} missing={missing} />

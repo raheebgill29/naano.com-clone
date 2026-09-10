@@ -14,6 +14,7 @@ import {
 import { CampaignForm } from "@/components/campaigns/CampaignForm";
 import { ConfirmButton } from "@/components/campaigns/ConfirmButton";
 import { LoadErrorToast } from "@/components/ui/load-error-toast";
+import { CollaborationWorkflowProgress } from "@/components/collaborations/workflow-progress";
 import { ParticipantAvatar } from "@/components/messages/ui";
 import { EmptyState, formatPriceCents } from "@/components/workspace/ui";
 import { withdrawInvitation } from "@/lib/campaigns/actions";
@@ -144,38 +145,44 @@ export function CampaignDetailWorkspace({
     );
   }
 
+  const roster = invitations.filter(
+    (inv) => inv.status !== "declined" && inv.status !== "cancelled",
+  );
+
   return (
-    <div className="space-y-5">
-      <nav aria-label="Breadcrumb">
-        <Link
-          href="/brand/campaigns"
-          className="text-sm font-semibold text-accent hover:text-accent-hover"
-        >
-          ← Back to campaigns
+    <div className="space-y-6">
+      <nav aria-label="Breadcrumb" className="text-[12px] text-support">
+        <Link href="/brand/campaigns" className="hover:text-ink">
+          Campaigns
         </Link>
+        <span aria-hidden className="mx-1.5">
+          /
+        </span>
+        <span className="text-ink">{campaign.campaign_name}</span>
       </nav>
 
-      <header className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      {/* Editorial header */}
+      <header className="border-b border-line pb-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="break-words text-2xl font-semibold tracking-tight text-ink">
-                {campaign.campaign_name}
-              </h1>
               <span
-                className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${campaignStatusBadgeClass(status)}`}
+                className={`inline-flex rounded-[6px] px-1.5 py-0.5 text-[11px] font-semibold ${campaignStatusBadgeClass(status)}`}
               >
                 {CAMPAIGN_STATUS_LABEL[status]}
               </span>
+              <span className="text-[12px] text-ink-subtle">
+                {campaign.product_or_company}
+              </span>
             </div>
-            <p className="mt-1 text-sm text-support">
-              {campaign.product_or_company}
-              {campaign.objective ? ` · ${campaign.objective}` : null}
-            </p>
-            <p className="mt-2 text-xs text-ink-subtle">
-              Created {formatDate(campaign.created_at)} · Updated{" "}
-              {relativeUpdated(campaign.updated_at, loadedAtMs)}
-            </p>
+            <h1 className="display mt-2 break-words text-[2.25rem] leading-[1.05] text-ink sm:text-[3rem]">
+              {campaign.campaign_name}
+            </h1>
+            {campaign.objective ? (
+              <p className="mt-3 max-w-2xl text-[15px] leading-6 text-ink-muted">
+                {campaign.objective}
+              </p>
+            ) : null}
           </div>
 
           <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -195,19 +202,21 @@ export function CampaignDetailWorkspace({
             />
           </div>
         </div>
-      </header>
 
-      <SummaryStrip
-        campaign={campaign}
-        stats={stats}
-        committedCostCents={committedCostCents}
-        progress={progress}
-      />
+        <SummaryStrip
+          campaign={campaign}
+          stats={stats}
+          committedCostCents={committedCostCents}
+          progress={progress}
+          creatorCount={roster.length}
+          loadedAtMs={loadedAtMs}
+        />
+      </header>
 
       <div
         role="tablist"
         aria-label="Campaign sections"
-        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1"
+        className="flex gap-1 overflow-x-auto border-b border-line"
       >
         {TABS.map((entry) => {
           const selected = tab === entry.key;
@@ -226,16 +235,18 @@ export function CampaignDetailWorkspace({
               role="tab"
               aria-selected={selected}
               onClick={() => setTab(entry.key)}
-              className={`shrink-0 rounded-[12px] px-3 py-2 text-sm font-semibold transition-colors duration-150 ${
+              className={`-mb-px inline-flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-[13px] font-semibold transition-colors ${
                 selected
-                  ? "bg-accent text-white"
-                  : "border border-line bg-surface text-ink hover:bg-page"
+                  ? "border-ink text-ink"
+                  : "border-transparent text-ink-muted hover:text-ink"
               }`}
             >
               {entry.label}
               {count != null ? (
                 <span
-                  className={`ml-1.5 tabular-nums ${selected ? "text-white/80" : "text-ink-subtle"}`}
+                  className={`tnum rounded-[5px] px-1.5 py-px text-[11px] ${
+                    selected ? "bg-ink text-white" : "bg-page text-ink-subtle"
+                  }`}
                 >
                   {count}
                 </span>
@@ -249,12 +260,16 @@ export function CampaignDetailWorkspace({
         <OverviewSection
           campaign={campaign}
           canEdit={canEdit}
+          canInvite={canInvite}
           readOnly={readOnly}
           status={status}
           blockers={blockers}
           primary={primary}
           committedCostCents={committedCostCents}
           stats={stats}
+          roster={roster}
+          progress={progress}
+          loadedAtMs={loadedAtMs}
         />
       ) : null}
 
@@ -285,169 +300,308 @@ function SummaryStrip({
   stats,
   committedCostCents,
   progress,
+  creatorCount,
+  loadedAtMs,
 }: {
   campaign: Campaign;
   stats: CampaignListStats;
   committedCostCents: number;
   progress: number | null;
+  creatorCount: number;
+  loadedAtMs: number;
 }) {
   const cells = [
-    {
-      label: "Target date",
-      value: formatDate(campaign.target_publish_date),
-    },
+    { label: "Target date", value: formatDate(campaign.target_publish_date) },
     {
       label: "Budget",
       value: formatPriceCents(campaign.budget_cents, campaign.currency),
+      hint:
+        committedCostCents > 0
+          ? `${formatPriceCents(committedCostCents, campaign.currency)} committed`
+          : "Nothing committed",
     },
     {
-      label: "Committed",
-      value: formatPriceCents(committedCostCents, campaign.currency),
+      label: "Creators",
+      value: String(creatorCount),
+      hint: `${stats.pending} pending · ${stats.active} active · ${stats.completed} done`,
     },
-    { label: "Invited", value: String(stats.invited) },
-    { label: "Active", value: String(stats.active) },
-    { label: "Completed", value: String(stats.completed) },
+    {
+      label: "Deliverable",
+      value: `${campaign.post_count} × ${campaign.deliverable_type}`,
+    },
+    {
+      label: "Progress",
+      value: progress != null ? `${progress}%` : "—",
+      hint: `Updated ${relativeUpdated(campaign.updated_at, loadedAtMs)}`,
+      progress,
+    },
   ];
 
   return (
-    <section className="rounded-[12px] border border-line bg-surface p-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-        {cells.map((cell) => (
-          <div key={cell.label} className="min-w-0">
-            <p className="text-[11px] font-medium text-ink-subtle">
-              {cell.label}
-            </p>
-            <p className="mt-1 truncate text-sm font-semibold text-ink">
-              {cell.value}
-            </p>
-          </div>
-        ))}
-      </div>
-      {progress != null ? (
-        <div className="mt-4">
-          <div className="mb-1 flex items-center justify-between text-[11px] text-ink-subtle">
-            <span>Collaboration progress</span>
-            <span>{progress}%</span>
-          </div>
-          <div
-            className="h-1.5 overflow-hidden rounded-full bg-page"
-            role="progressbar"
-            aria-valuenow={progress}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Collaboration progress"
-          >
+    <dl className="tnum mt-6 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-5">
+      {cells.map((cell) => (
+        <div key={cell.label} className="min-w-0">
+          <dt className="text-[11px] font-medium text-ink-subtle">{cell.label}</dt>
+          <dd className="display mt-0.5 truncate text-[1.5rem] text-ink">
+            {cell.value}
+          </dd>
+          {"progress" in cell && cell.progress != null ? (
             <div
-              className="h-full rounded-full bg-accent"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+              className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-page"
+              role="progressbar"
+              aria-valuenow={cell.progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Collaboration progress"
+            >
+              <div
+                className="h-full rounded-full bg-ink"
+                style={{ width: `${cell.progress}%` }}
+              />
+            </div>
+          ) : null}
+          {cell.hint ? (
+            <p className="mt-0.5 truncate text-[11px] text-support">{cell.hint}</p>
+          ) : null}
         </div>
-      ) : null}
-    </section>
+      ))}
+    </dl>
   );
 }
 
 function OverviewSection({
   campaign,
   canEdit,
+  canInvite,
   readOnly,
   status,
   blockers,
   primary,
   committedCostCents,
   stats,
+  roster,
+  progress,
+  loadedAtMs,
 }: {
   campaign: Campaign;
   canEdit: boolean;
+  canInvite: boolean;
   readOnly: boolean;
   status: CampaignStatus;
   blockers: ReturnType<typeof analyzeCampaignLifecycleBlockers>;
   primary: CampaignDetailPrimaryAction | null;
   committedCostCents: number;
   stats: CampaignListStats;
+  roster: CampaignDetailInvitation[];
+  progress: number | null;
+  loadedAtMs: number;
 }) {
+  const brief = (
+    <div className="space-y-5 text-sm">
+      <BriefBlock title="Objective" body={campaign.objective} />
+      <BriefBlock title="Description" body={campaign.description} pre />
+      <div>
+        <h3 className="text-[11px] font-medium text-ink-subtle">Key messages</h3>
+        <ul className="mt-1.5 list-disc space-y-1 pl-5 text-ink">
+          {(campaign.key_messages ?? []).map((msg) => (
+            <li key={msg}>{msg}</li>
+          ))}
+        </ul>
+      </div>
+      <BriefBlock
+        title="Creator guidelines"
+        body={campaign.creator_guidelines}
+        pre
+      />
+      {readOnly ? (
+        <p className="text-[12px] text-ink-subtle">
+          Brief editing is locked for completed and archived campaigns.
+        </p>
+      ) : null}
+    </div>
+  );
+
   return (
-    <div className="grid gap-5 lg:grid-cols-12">
-      <div className="min-w-0 space-y-5 lg:col-span-8">
-        <section className="rounded-[12px] border border-line bg-surface p-5 sm:p-6">
-          <h2 className="text-base font-semibold text-ink">Campaign brief</h2>
-          {canEdit ? (
+    <div className="grid gap-8 lg:grid-cols-12">
+      <div className="min-w-0 space-y-8 lg:col-span-8">
+        {canEdit ? (
+          <section>
+            <div className="flex items-baseline justify-between gap-3 border-t border-ink/80 pt-3">
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+                Campaign brief
+              </h2>
+              <span className="text-[12px] text-ink-subtle">Draft · editable</span>
+            </div>
             <div className="mt-4">
               <CampaignForm campaign={campaign} campaignId={campaign.id} />
             </div>
-          ) : (
-            <div className="mt-4 space-y-5 text-sm">
-              <BriefBlock title="Objective" body={campaign.objective} />
-              <BriefBlock
-                title="Description"
-                body={campaign.description}
-                pre
-              />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <BriefBlock
-                  title="Deliverable"
-                  body={`${campaign.deliverable_type} · ${campaign.post_count} post${campaign.post_count === 1 ? "" : "s"}`}
-                />
-                <BriefBlock
-                  title="Target publish date"
-                  body={formatDate(campaign.target_publish_date)}
-                />
-              </div>
-              <div>
-                <h3 className="text-[11px] font-medium text-ink-subtle">
-                  Key messages
-                </h3>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-ink">
-                  {(campaign.key_messages ?? []).map((msg) => (
-                    <li key={msg}>{msg}</li>
-                  ))}
-                </ul>
-              </div>
-              <BriefBlock
-                title="Creator guidelines"
-                body={campaign.creator_guidelines}
-                pre
-              />
-              {readOnly ? (
-                <p className="rounded-[12px] bg-page px-3 py-2 text-xs text-support">
-                  Brief editing is locked for completed and archived campaigns.
-                </p>
+          </section>
+        ) : null}
+
+        <section>
+          <div className="flex items-baseline justify-between gap-3 border-t border-ink/80 pt-3">
+            <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+              Roster
+              <span className="tnum ml-2 font-medium tracking-normal text-ink-subtle">
+                {roster.length}
+              </span>
+            </h2>
+            {canInvite ? (
+              <Link
+                href={`/brand/discover?campaignId=${campaign.id}`}
+                className="text-[12px] font-semibold text-ink-muted hover:text-ink"
+              >
+                Invite creators
+              </Link>
+            ) : null}
+          </div>
+
+          {roster.length === 0 ? (
+            <div className="mt-3 rounded-[12px] border border-dashed border-line-strong px-5 py-8 text-center">
+              <p className="text-[15px] font-semibold text-ink">No creators yet</p>
+              <p className="mx-auto mt-1 max-w-sm text-sm text-support">
+                Invite published creators from the marketplace. Their progress
+                will show here.
+              </p>
+              {canInvite ? (
+                <Link
+                  href={`/brand/discover?campaignId=${campaign.id}`}
+                  className="mt-4 inline-flex h-9 items-center rounded-[8px] bg-ink px-3.5 text-[13px] font-semibold text-white hover:bg-ink-muted"
+                >
+                  Browse creators
+                </Link>
               ) : null}
             </div>
+          ) : (
+            <ul className="mt-2 divide-y divide-line">
+              {roster.map((inv) => {
+                const name = inv.creator?.full_name ?? "Creator";
+                const isPending = inv.status === "booking_pending";
+                const href = isPending
+                  ? inv.creator?.slug
+                    ? `/brand/creators/${inv.creator.slug}`
+                    : `/brand/campaigns/${campaign.id}?tab=creators`
+                  : `/brand/collaborations/${inv.id}`;
+                const attention =
+                  inv.status === "draft_submitted" ||
+                  inv.status === "published" ||
+                  inv.status === "approved";
+                return (
+                  <li key={inv.id}>
+                    <Link
+                      href={href}
+                      className="group grid gap-x-4 gap-y-2 py-3 sm:grid-cols-[minmax(0,3fr)_minmax(0,3fr)_minmax(0,2fr)] sm:items-center"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <ParticipantAvatar name={name} />
+                        <div className="min-w-0">
+                          <p className="truncate text-[14px] font-semibold text-ink group-hover:text-accent">
+                            {name}
+                          </p>
+                          <p className="truncate text-[12px] text-support">
+                            {inv.creator?.headline ?? "—"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <span
+                          className={`inline-flex rounded-[6px] px-1.5 py-0.5 text-[11px] font-semibold ${collaborationStatusBadgeClass(inv.status)}`}
+                        >
+                          {invitationDisplayLabel(inv)}
+                        </span>
+                        {!isPending ? (
+                          <div className="mt-1.5">
+                            <CollaborationWorkflowProgress status={inv.status} />
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="tnum text-[12px] sm:text-right">
+                        <p className={`font-semibold ${attention ? "text-accent" : "text-ink"}`}>
+                          {isPending
+                            ? "Awaiting reply"
+                            : brandNextActionForInvite(inv.status)}
+                        </p>
+                        <p className="text-support">
+                          {formatPriceCents(
+                            inv.price_cents * inv.post_count_snapshot,
+                            inv.currency,
+                          )}{" "}
+                          · {relativeUpdated(inv.updated_at, loadedAtMs)}
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           )}
         </section>
+
+        {(blockers.pendingInvitations > 0 || blockers.activeCollaborations > 0) &&
+        (status === "active" || status === "paused") ? (
+          <p className="text-[12px] text-support">
+            Before this campaign can be completed:{" "}
+            {blockers.pendingInvitations > 0
+              ? `${blockers.pendingInvitations} pending invitation${blockers.pendingInvitations === 1 ? "" : "s"}`
+              : null}
+            {blockers.pendingInvitations > 0 && blockers.activeCollaborations > 0
+              ? " · "
+              : null}
+            {blockers.activeCollaborations > 0
+              ? `${blockers.activeCollaborations} active collaboration${blockers.activeCollaborations === 1 ? "" : "s"}`
+              : null}
+            .
+          </p>
+        ) : null}
       </div>
 
-      <aside className="min-w-0 space-y-4 lg:col-span-4">
-        <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-          <h2 className="text-sm font-semibold text-ink">Status</h2>
-          <span
-            className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${campaignStatusBadgeClass(status)}`}
-          >
-            {CAMPAIGN_STATUS_LABEL[status]}
-          </span>
-          <p className="mt-2 text-sm text-support">
-            {CAMPAIGN_STATUS_EXPLANATION[status]}
-          </p>
+      <aside className="min-w-0 space-y-7 lg:col-span-4">
+        <section>
+          <div className="border-t border-ink/80 pt-3">
+            <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+              Next action
+            </h2>
+          </div>
+          {primary ? (
+            <div className="mt-3">
+              <PrimaryActionButton
+                campaignId={campaign.id}
+                primary={primary}
+                fullWidth
+              />
+              <p className="mt-2 text-[12px] leading-5 text-support">
+                {stats.draftsAwaitingReview > 0
+                  ? `${stats.draftsAwaitingReview} draft${stats.draftsAwaitingReview === 1 ? "" : "s"} awaiting review.`
+                  : CAMPAIGN_STATUS_EXPLANATION[status]}
+              </p>
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-support">
+              {CAMPAIGN_STATUS_EXPLANATION[status]}
+            </p>
+          )}
         </section>
 
-        <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-          <h2 className="text-sm font-semibold text-ink">Budget summary</h2>
-          <dl className="mt-3 space-y-2 text-sm">
-            <div className="flex justify-between gap-3">
+        <section>
+          <div className="border-t border-line pt-3">
+            <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+              Budget
+            </h2>
+          </div>
+          <dl className="tnum mt-2 divide-y divide-line text-[13px]">
+            <div className="flex justify-between gap-3 py-2">
               <dt className="text-support">Limit</dt>
               <dd className="font-semibold text-ink">
                 {formatPriceCents(campaign.budget_cents, campaign.currency)}
               </dd>
             </div>
-            <div className="flex justify-between gap-3">
+            <div className="flex justify-between gap-3 py-2">
               <dt className="text-support">Committed</dt>
               <dd className="font-semibold text-ink">
                 {formatPriceCents(committedCostCents, campaign.currency)}
               </dd>
             </div>
-            <div className="flex justify-between gap-3">
+            <div className="flex justify-between gap-3 py-2">
               <dt className="text-support">Remaining</dt>
               <dd className="font-semibold text-ink">
                 {formatPriceCents(
@@ -459,47 +613,38 @@ function OverviewSection({
           </dl>
         </section>
 
-        <section className="rounded-[12px] border border-line bg-surface p-4 sm:p-5">
-          <h2 className="text-sm font-semibold text-ink">Next action</h2>
-          {primary ? (
-            <div className="mt-3">
-              <PrimaryActionButton
-                campaignId={campaign.id}
-                primary={primary}
-                fullWidth
-              />
-              <p className="mt-2 text-xs text-support">
-                {stats.draftsAwaitingReview > 0
-                  ? `${stats.draftsAwaitingReview} draft${stats.draftsAwaitingReview === 1 ? "" : "s"} awaiting review.`
-                  : CAMPAIGN_STATUS_EXPLANATION[status]}
-              </p>
+        <section>
+          <div className="border-t border-line pt-3">
+            <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+              Schedule
+            </h2>
+          </div>
+          <dl className="tnum mt-2 divide-y divide-line text-[13px]">
+            <div className="flex justify-between gap-3 py-2">
+              <dt className="text-support">Target publish</dt>
+              <dd className="font-semibold text-ink">
+                {formatDate(campaign.target_publish_date)}
+              </dd>
             </div>
-          ) : (
-            <p className="mt-2 text-sm text-support">
-              No immediate action required.
-            </p>
-          )}
+            <div className="flex justify-between gap-3 py-2">
+              <dt className="text-support">Created</dt>
+              <dd className="text-ink">{formatDate(campaign.created_at)}</dd>
+            </div>
+            <div className="flex justify-between gap-3 py-2">
+              <dt className="text-support">Progress</dt>
+              <dd className="text-ink">{progress != null ? `${progress}%` : "—"}</dd>
+            </div>
+          </dl>
         </section>
 
-        {(blockers.pendingInvitations > 0 ||
-          blockers.activeCollaborations > 0) &&
-        (status === "active" || status === "paused") ? (
-          <section className="rounded-[12px] border border-warning/30 bg-warning-soft/40 p-4">
-            <h2 className="text-sm font-semibold text-ink">Blockers</h2>
-            <p className="mt-2 text-sm text-support">
-              Before completing:{" "}
-              {blockers.pendingInvitations > 0
-                ? `${blockers.pendingInvitations} pending invitation${blockers.pendingInvitations === 1 ? "" : "s"}`
-                : null}
-              {blockers.pendingInvitations > 0 &&
-              blockers.activeCollaborations > 0
-                ? " · "
-                : null}
-              {blockers.activeCollaborations > 0
-                ? `${blockers.activeCollaborations} active collaboration${blockers.activeCollaborations === 1 ? "" : "s"}`
-                : null}
-              .
-            </p>
+        {!canEdit ? (
+          <section>
+            <div className="border-t border-line pt-3">
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+                Brief
+              </h2>
+            </div>
+            <div className="mt-3">{brief}</div>
           </section>
         ) : null}
       </aside>
@@ -552,7 +697,7 @@ function CreatorsSection({
         {canInvite ? (
           <Link
             href={`/brand/discover?campaignId=${campaignId}`}
-            className="inline-flex items-center justify-center rounded-[12px] bg-accent px-3 py-2 text-sm font-semibold text-white hover:bg-accent-hover"
+            className="inline-flex items-center justify-center h-9 rounded-[8px] bg-ink px-3 text-[13px] font-semibold text-white hover:bg-ink-muted"
           >
             Invite creators
           </Link>
@@ -676,7 +821,7 @@ function InvitationRow({
           {invite.creator?.slug ? (
             <Link
               href={`/brand/creators/${invite.creator.slug}`}
-              className="inline-flex items-center justify-center rounded-[12px] border border-line-strong bg-surface px-3 py-2 text-sm font-semibold text-ink hover:bg-page"
+              className="inline-flex items-center justify-center h-9 rounded-[8px] border border-line bg-surface px-3 text-[13px] font-semibold text-ink hover:border-line-strong hover:bg-page"
             >
               View creator
             </Link>
@@ -696,7 +841,7 @@ function InvitationRow({
           {isCollab ? (
             <Link
               href={`/brand/collaborations/${invite.id}`}
-              className="inline-flex items-center justify-center rounded-[12px] bg-accent px-3 py-2 text-sm font-semibold text-white hover:bg-accent-hover"
+              className="inline-flex items-center justify-center h-9 rounded-[8px] bg-ink px-3 text-[13px] font-semibold text-white hover:bg-ink-muted"
             >
               Open collaboration
             </Link>
@@ -849,7 +994,7 @@ function PrimaryActionButton({
     return (
       <Link
         href={primary.href}
-        className={`inline-flex items-center justify-center rounded-[12px] bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover ${width}`}
+        className={`inline-flex items-center justify-center h-10 rounded-[10px] bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-muted ${width}`}
       >
         {primary.label}
       </Link>
@@ -862,7 +1007,7 @@ function PrimaryActionButton({
         action={primary.action}
         label={primary.label}
         requiresConfirm={primary.requiresConfirm}
-        className={`inline-flex items-center justify-center rounded-[12px] bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover disabled:opacity-60 ${width}`}
+        className={`inline-flex items-center justify-center h-10 rounded-[10px] bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-muted disabled:opacity-60 ${width}`}
       />
     );
   }
@@ -918,7 +1063,7 @@ function DetailOverflowMenu({
         aria-controls={menuId}
         aria-label="More campaign actions"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-[42px] w-10 items-center justify-center rounded-[12px] border border-line-strong bg-surface text-ink hover:bg-page"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-line bg-surface text-ink hover:border-line-strong hover:bg-page"
       >
         <span aria-hidden>⋯</span>
       </button>

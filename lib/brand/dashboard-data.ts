@@ -42,17 +42,41 @@ export type AttentionItem = {
   sortAt: string;
 };
 
+export type CampaignRosterCreator = {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+};
+
 export type ActiveCampaignCard = {
   id: string;
   name: string;
   status: CampaignStatus;
   statusLabel: string;
   targetPublishDate: string;
+  budgetCents: number;
+  currency: string;
   pendingInvites: number;
   activeCollaborations: number;
   completedCollaborations: number;
   totalInvitations: number;
   progressLabel: string;
+  progressPercent: number;
+  roster: CampaignRosterCreator[];
+  nextMilestone: string;
+  nextAction: { label: string; href: string };
+};
+
+export type RecommendedCreator = {
+  id: string;
+  slug: string;
+  fullName: string;
+  avatarUrl: string | null;
+  headline: string;
+  audienceSize: number;
+  priceCents: number;
+  currency: string;
+  topics: string[];
 };
 
 export type ProfileCompletion = {
@@ -81,9 +105,11 @@ export type ActivityItem = {
   subject: string;
   href: string;
   createdAt: string;
+  actor?: { name: string; avatarUrl: string | null };
 };
 
 export type BrandDashboardData = {
+  loadedAtMs: number;
   profile: Profile;
   brand: Brand | null;
   metrics: BrandDashboardMetrics;
@@ -92,6 +118,7 @@ export type BrandDashboardData = {
   profileCompletion: ProfileCompletion | null;
   nextActions: NextBestAction[];
   recentActivity: ActivityItem[];
+  recommendedCreators: RecommendedCreator[];
 };
 
 type CampaignRow = {
@@ -99,6 +126,8 @@ type CampaignRow = {
   campaign_name: string;
   status: CampaignStatus;
   target_publish_date: string;
+  budget_cents: number;
+  currency: string;
   created_at: string;
   updated_at: string;
 };
@@ -187,7 +216,12 @@ export function computeBrandProfileCompletion(
   };
 }
 
-function formatCampaignProgress(card: Omit<ActiveCampaignCard, "progressLabel">) {
+function formatCampaignProgress(card: {
+  totalInvitations: number;
+  activeCollaborations: number;
+  pendingInvites: number;
+  completedCollaborations: number;
+}) {
   if (card.totalInvitations === 0) {
     return "No creators invited yet";
   }
@@ -197,6 +231,51 @@ function formatCampaignProgress(card: Omit<ActiveCampaignCard, "progressLabel">)
     `${card.completedCollaborations} completed`,
   ];
   return parts.join(" · ");
+}
+
+function campaignNextStep(
+  campaign: CampaignRow,
+  rows: InviteRow[],
+): { milestone: string; action: { label: string; href: string } } {
+  const href = `/brand/campaigns/${campaign.id}`;
+  const has = (s: CampaignCreatorStatus) => rows.some((r) => r.status === s);
+  if (rows.length === 0) {
+    return {
+      milestone: "Invite creators",
+      action: { label: "Invite creators", href: `/brand/discover?campaignId=${campaign.id}` },
+    };
+  }
+  if (has("draft_submitted")) {
+    const row = rows.find((r) => r.status === "draft_submitted")!;
+    return {
+      milestone: "Draft review",
+      action: { label: "Review draft", href: `/brand/collaborations/${row.id}` },
+    };
+  }
+  if (has("approved")) {
+    const row = rows.find((r) => r.status === "approved")!;
+    return {
+      milestone: "Schedule publication",
+      action: { label: "Set schedule", href: `/brand/collaborations/${row.id}` },
+    };
+  }
+  if (has("published")) {
+    const row = rows.find((r) => r.status === "published")!;
+    return {
+      milestone: "Confirm completion",
+      action: { label: "Mark complete", href: `/brand/collaborations/${row.id}` },
+    };
+  }
+  if (has("scheduled")) {
+    return { milestone: "Awaiting publication", action: { label: "Open campaign", href } };
+  }
+  if (has("booking_pending")) {
+    return { milestone: "Awaiting creator replies", action: { label: "Open campaign", href } };
+  }
+  if (has("accepted") || has("revision_requested")) {
+    return { milestone: "Awaiting draft", action: { label: "Open campaign", href } };
+  }
+  return { milestone: "Wrap up campaign", action: { label: "Open campaign", href } };
 }
 
 function humanizeCollabEvent(type: string, message: string | null): string {
@@ -255,6 +334,7 @@ function daysUntil(isoDate: string) {
 export async function loadBrandDashboard(
   profile: Profile,
 ): Promise<BrandDashboardData> {
+  const loadedAtMs = Date.now();
   const supabase = await createClient();
 
   const [{ data: brand }, unread] = await Promise.all([
@@ -273,8 +353,10 @@ export async function loadBrandDashboard(
 
   if (!brand) {
     return {
+      loadedAtMs,
       profile,
       brand: null,
+      recommendedCreators: [],
       metrics: emptyMetrics,
       attention: unread.count
         ? [
@@ -310,7 +392,7 @@ export async function loadBrandDashboard(
   const { data: campaignsData } = await supabase
     .from("campaigns")
     .select(
-      "id,campaign_name,status,target_publish_date,created_at,updated_at",
+      "id,campaign_name,status,target_publish_date,budget_cents,currency,created_at,updated_at",
     )
     .eq("brand_id", brand.id)
     .order("updated_at", { ascending: false });
@@ -323,6 +405,7 @@ export async function loadBrandDashboard(
   let campaignEvents: CampaignEventRow[] = [];
   let collabEvents: CollabEventRow[] = [];
   const creatorNameById = new Map<string, string>();
+  const creatorAvatarById = new Map<string, string | null>();
 
   if (campaignIds.length) {
     const [{ data: inviteRows }, { data: campEvents }] = await Promise.all([
@@ -351,7 +434,7 @@ export async function loadBrandDashboard(
       creatorIds.length
         ? supabase
             .from("creators")
-            .select("id,profiles!creators_profile_id_fkey(full_name)")
+            .select("id,profiles!creators_profile_id_fkey(full_name,avatar_url)")
             .in("id", creatorIds)
         : Promise.resolve({ data: [] as unknown[] }),
       inviteIds.length
@@ -364,18 +447,64 @@ export async function loadBrandDashboard(
         : Promise.resolve({ data: [] as unknown[] }),
     ]);
 
+    type ProfileJoin = { full_name: string; avatar_url: string | null };
     for (const row of (creators ?? []) as Array<{
       id: string;
-      profiles: { full_name: string } | { full_name: string }[] | null;
+      profiles: ProfileJoin | ProfileJoin[] | null;
     }>) {
       const profileJoin = Array.isArray(row.profiles)
         ? row.profiles[0]
         : row.profiles;
       creatorNameById.set(row.id, profileJoin?.full_name ?? "Creator");
+      creatorAvatarById.set(row.id, profileJoin?.avatar_url ?? null);
     }
 
     collabEvents = (collabEventRows ?? []) as CollabEventRow[];
   }
+
+  // Published creators not yet on any of this brand's campaigns
+  const invitedCreatorIds = new Set(invites.map((i) => i.creator_id));
+  const { data: recommendedRows } = await supabase
+    .from("creators")
+    .select(
+      "id,slug,headline,audience_size,price_cents,currency,topics,profiles!creators_profile_id_fkey(full_name,avatar_url)",
+    )
+    .eq("publication_status", "published")
+    .eq("availability", "available")
+    .order("audience_size", { ascending: false })
+    .limit(12);
+
+  const recommendedCreators: RecommendedCreator[] = (
+    (recommendedRows ?? []) as unknown as Array<{
+      id: string;
+      slug: string;
+      headline: string;
+      audience_size: number;
+      price_cents: number;
+      currency: string;
+      topics: string[];
+      profiles:
+        | { full_name: string; avatar_url: string | null }
+        | { full_name: string; avatar_url: string | null }[]
+        | null;
+    }>
+  )
+    .filter((row) => !invitedCreatorIds.has(row.id))
+    .slice(0, 4)
+    .map((row) => {
+      const p = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+      return {
+        id: row.id,
+        slug: row.slug,
+        fullName: p?.full_name ?? "Creator",
+        avatarUrl: p?.avatar_url ?? null,
+        headline: row.headline,
+        audienceSize: row.audience_size,
+        priceCents: row.price_cents,
+        currency: row.currency,
+        topics: row.topics ?? [],
+      };
+    });
 
   const metrics: BrandDashboardMetrics = {
     activeCampaigns: campaigns.filter((c) => c.status === "active").length,
@@ -560,12 +689,7 @@ export async function loadBrandDashboard(
     .slice(0, 3)
     .map((campaign) => {
       const rows = invitesByCampaign.get(campaign.id) ?? [];
-      const card = {
-        id: campaign.id,
-        name: campaign.campaign_name,
-        status: campaign.status,
-        statusLabel: CAMPAIGN_STATUS_LABEL[campaign.status],
-        targetPublishDate: campaign.target_publish_date,
+      const counts = {
         pendingInvites: rows.filter((r) => r.status === "booking_pending")
           .length,
         activeCollaborations: rows.filter((r) =>
@@ -576,9 +700,40 @@ export async function loadBrandDashboard(
         completedCollaborations: rows.filter((r) => r.status === "completed")
           .length,
         totalInvitations: rows.length,
-        progressLabel: "",
       };
-      return { ...card, progressLabel: formatCampaignProgress(card) };
+      const engaged = rows.filter(
+        (r) => r.status !== "declined" && r.status !== "cancelled",
+      ).length;
+      const next = campaignNextStep(campaign, rows);
+      const rosterSeen = new Set<string>();
+      const roster: CampaignRosterCreator[] = [];
+      for (const r of rows) {
+        if (r.status === "declined" || r.status === "cancelled") continue;
+        if (rosterSeen.has(r.creator_id)) continue;
+        rosterSeen.add(r.creator_id);
+        roster.push({
+          id: r.creator_id,
+          name: creatorNameById.get(r.creator_id) ?? "Creator",
+          avatarUrl: creatorAvatarById.get(r.creator_id) ?? null,
+        });
+      }
+      return {
+        id: campaign.id,
+        name: campaign.campaign_name,
+        status: campaign.status,
+        statusLabel: CAMPAIGN_STATUS_LABEL[campaign.status],
+        targetPublishDate: campaign.target_publish_date,
+        budgetCents: campaign.budget_cents,
+        currency: campaign.currency,
+        ...counts,
+        progressLabel: formatCampaignProgress(counts),
+        progressPercent: engaged
+          ? Math.round((counts.completedCollaborations / engaged) * 100)
+          : 0,
+        roster,
+        nextMilestone: next.milestone,
+        nextAction: next.action,
+      };
     });
 
   const profileCompletion = computeBrandProfileCompletion(brand);
@@ -727,9 +882,13 @@ export async function loadBrandDashboard(
       id: `cle-${event.id}`,
       eventType: event.event_type,
       description: humanizeCollabEvent(event.event_type, event.message),
-      subject: `${creatorName} · ${campaign?.campaign_name ?? "Campaign"}`,
+      subject: campaign?.campaign_name ?? "Campaign",
       href: `/brand/collaborations/${invite.id}`,
       createdAt: event.created_at,
+      actor: {
+        name: creatorName,
+        avatarUrl: creatorAvatarById.get(invite.creator_id) ?? null,
+      },
     });
   }
 
@@ -742,9 +901,13 @@ export async function loadBrandDashboard(
       id: `inv-${invite.id}`,
       eventType: "invitation_sent",
       description: "Invitation sent",
-      subject: `${creatorName} · ${campaign?.campaign_name ?? "Campaign"}`,
+      subject: campaign?.campaign_name ?? "Campaign",
       href: `/brand/campaigns/${invite.campaign_id}`,
       createdAt: invite.invited_at,
+      actor: {
+        name: creatorName,
+        avatarUrl: creatorAvatarById.get(invite.creator_id) ?? null,
+      },
     });
   }
 
@@ -756,6 +919,7 @@ export async function loadBrandDashboard(
     .slice(0, 6);
 
   return {
+    loadedAtMs,
     profile,
     brand,
     metrics,
@@ -764,5 +928,6 @@ export async function loadBrandDashboard(
     profileCompletion,
     nextActions: filteredNext,
     recentActivity,
+    recommendedCreators,
   };
 }

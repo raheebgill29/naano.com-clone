@@ -54,6 +54,7 @@ export default async function CreatorWorkspaceLayout({
       notifications={items}
       unreadNotifications={unreadCount}
       recipientProfileId={userId}
+      wide
     >
       {children}
     </WorkspaceShell>

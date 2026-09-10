@@ -14,7 +14,7 @@ const creators = [
     followers: "48.2K",
     fit: 94,
     price: "$650",
-    tone: "bg-blue-100 text-blue-800",
+    tone: "bg-accent-soft text-accent",
   },
   {
     initials: "JR",
